@@ -1,0 +1,862 @@
+{
+    "cfg": [
+        "% SDK Parameters\n",
+        "% See the SDK user's guide for more information\n",
+        "% \"C:\\ti\\mmwave_sdk_[VER]\\docs\\mmwave_sdk_user_guide.pdf\"\n",
+        "sensorStop\n",
+        "flushCfg\n",
+        "dfeDataOutputMode 1\n",
+        "channelCfg 15 7 0\n",
+        "adcCfg 2 1\n",
+        "adcbufCfg -1 0 1 1 1\n",
+        "lowPower 0 0\n",
+        "\n",
+        "% Detection Layer Parameters\n",
+        "% See the Detection Layer Tuning Guide for more information\n",
+        "% \"<RADAR_TOOLBOX_INSTALL_DIR>\\source\\ti\\examples\\People_Tracking\\docs\\IWR6843_People_Tracking_PDFs\\3D_people_tracking_detection_layer_tuning_guide.pdf\"\n",
+        "profileCfg 0 60.75 30.00 25.00 59.10 394758 0 54.71 1 96 2950.00 2 1 36 \n",
+        "chirpCfg 0 0 0 0 0 0 0 1\n",
+        "chirpCfg 1 1 0 0 0 0 0 2\n",
+        "chirpCfg 2 2 0 0 0 0 0 4\n",
+        "frameCfg 0 2 96 0 55.00 1 0\n",
+        "dynamicRACfarCfg -1 4 4 2 2 8 12 4 12 5.00 8.00 0.40 1 1\n",
+        "staticRACfarCfg -1 6 2 2 2 8 8 6 4 8.00 15.00 0.30 0 0\n",
+        "dynamicRangeAngleCfg -1 0.75 0.0010 1 0\n",
+        "dynamic2DAngleCfg -1 3.0 0.0300 1 0 1 0.30 0.85 8.00\n",
+        "staticRangeAngleCfg -1 0 8 8\n",
+        "antGeometry0 -1 -1 0 0 -3 -3 -2 -2 -1 -1 0 0\n",
+        "antGeometry1 -1 0 -1 0 -3 -2 -3 -2 -3 -2 -3 -2\n",
+        "antPhaseRot 1 -1 1 -1 1 -1 1 -1 1 -1 1 -1\n",
+        "fovCfg -1 70.0 70.0\n",
+        "compRangeBiasAndRxChanPhase 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0\n",
+        "\n",
+        "% Tracker Layer Parameters\n",
+        "% See the Tracking Layer Tuning Guide for more information\n",
+        "% \"C:\\ti\\radar_toolbox_[VER]\\source\\ti\\examples\\People_Tracking\\docs\\IWR6843_People_Tracking_PDFs\\3D_people_tracking_tracker_layer_tuning_guide.pdf\" \n",
+        "staticBoundaryBox -3 3 0.5 7.5 0 3\n",
+        "boundaryBox -4 4 0 8 0 3\n",
+        "sensorPosition 2 0 15\n",
+        "gatingParam 3 2 2 3 4\n",
+        "stateParam 3 3 12 500 5 6000\n",
+        "allocationParam 20 100 0.1 20 0.5 20\n",
+        "maxAcceleration 0.1 0.1 0.1\n",
+        "trackingCfg 1 2 800 30 46 96 55\n",
+        "presenceBoundaryBox -3 3 0.5 7.5 0 3\n",
+        "sensorStart\n"
+    ],
+    "demo": "3D People Tracking",
+    "device": "xWR6843",
+    "data": [
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26585,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416663.1733
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26586,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416694.1714
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26587,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416727.1724
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26588,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416757.1707
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26589,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416787.8074
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26590,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416820.3772
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26591,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416850.1577
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26592,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416880.488
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26593,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416913.5947
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26594,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416943.7124
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26595,
+                "pointCloud": []
+            },
+            "timestamp": 1752432416977.3667
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26596,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417008.5444
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26597,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417038.089
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26598,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417071.6843
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26599,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417099.923
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26600,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417130.0166
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26601,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417162.7937
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26602,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417194.7944
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26603,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417227.5269
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26604,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417258.899
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26605,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417289.4207
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26606,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417318.3442
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26607,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417351.4998
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26608,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417381.5312
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26609,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417411.7915
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26610,
+                "pointCloud": [
+                    [
+                        -0.028370250700559527,
+                        0.21632301608387078,
+                        2.1280956192384957,
+                        -2.7832000743364915,
+                        5.239999882876873,
+                        0.0,
+                        255.0
+                    ]
+                ],
+                "numDetectedPoints": 1
+            },
+            "timestamp": 1752432417442.8867
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26611,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417474.7666
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26612,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417505.7725
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26613,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417536.721
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26614,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417568.6016
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26615,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417599.9675
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26616,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417630.187
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26617,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417663.5994
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26618,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417697.5732
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26619,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417726.1833
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26620,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417758.5754
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26621,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417787.7922
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26622,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417819.196
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26623,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417850.7996
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26624,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417882.8682
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26625,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417913.2769
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26626,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417943.5737
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26627,
+                "pointCloud": []
+            },
+            "timestamp": 1752432417977.3088
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26628,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418008.2212
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26629,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418039.9321
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26630,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418070.2576
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26631,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418101.1648
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26632,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418132.5813
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26633,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418163.6438
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26634,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418194.2517
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26635,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418225.804
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26636,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418256.456
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26637,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418289.4724
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26638,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418321.4324
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26639,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418350.468
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26640,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418383.0752
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26641,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418412.1448
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26642,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418443.9202
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26643,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418476.1077
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26644,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418506.7717
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26645,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418538.8655
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26646,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418569.8665
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26647,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418603.0586
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26648,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418632.2024
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26649,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418665.035
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26650,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418697.2505
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26651,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418726.25
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26652,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418756.25
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26653,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418793.2502
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26654,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418823.2502
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26655,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418849.251
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26656,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418883.2515
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26657,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418913.2532
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26658,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418945.2537
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26659,
+                "pointCloud": []
+            },
+            "timestamp": 1752432418975.248
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26660,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419007.248
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26661,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419039.2517
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26662,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419070.1301
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26663,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419100.518
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26664,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419131.0923
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26665,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419161.7913
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26666,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419198.3267
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26667,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419229.3276
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26668,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419259.3289
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26669,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419291.33
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26670,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419320.3298
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26671,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419352.5803
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26672,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419381.5752
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26673,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419413.2908
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26674,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419442.6387
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26675,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419477.8997
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26676,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419506.9006
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26677,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419539.4531
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26678,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419567.515
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26679,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419600.9746
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26680,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419632.0698
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26681,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419665.473
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26682,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419695.179
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26683,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419728.785
+        },
+        {
+            "frameData": {
+                "error": 0,
+                "frameNum": 26684,
+                "pointCloud": []
+            },
+            "timestamp": 1752432419757.1924
+        }
+    ]
+}
