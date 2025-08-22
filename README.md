@@ -2,6 +2,10 @@
 
 A real-time human action recognition system using TI IWR6843 radar sensor and PETer (Point cloud Edge Transformer) neural network architecture. This system can classify three human actions: sitting, squatting, and standing.
 
+## Demo
+
+Watch the system in action: [YouTube Demo](https://youtu.be/M7bTbZctuMI)
+
 ## Project Overview
 
 This project implements a complete pipeline for radar-based human action recognition:
