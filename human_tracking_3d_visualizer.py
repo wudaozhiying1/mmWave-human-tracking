@@ -24,12 +24,11 @@ from gl_text import GLTextItem
 
 # Import utility functions
 from graph_utilities import getBoxLinesCoords, get_trackColors
-# from human_model_3d import HumanModelFactory  # 暂时禁用3D模型
-
+# from human_model_3d import HumanModelFactory  
 # Import radar reader and action recognition system
 from real_time_radar_reader import RealTimeRadarReader
-# 使用PyTorch模型进行动作识别
-USE_IMPROVED_SYSTEM = True  # 使用PyTorch模型
+
+USE_IMPROVED_SYSTEM = True  
 
 # Action color mapping for 4D point cloud balanced model
 ACTION_COLORS = {
@@ -66,7 +65,7 @@ class HumanTrackingVisualizer(QMainWindow):
         
         # Control parameters
         self.show_trails = True
-        self.show_human_models = False  # 暂时禁用3D模型避免渲染错误
+        self.show_human_models = False  
         self.trail_length = 20
         self.point_size = 5
         self.human_model_type = "simple"  # "simple" or "detailed"
@@ -435,8 +434,8 @@ class HumanTrackingVisualizer(QMainWindow):
     
     def recreate_human_models(self):
         """Recreate all human models"""
-        # 暂时禁用3D模型功能
-        print("⚠️ 3D模型功能暂时禁用")
+
+        print(" 3D Ban")
         return
         
         # Save current tracked target positions
@@ -490,8 +489,7 @@ class HumanTrackingVisualizer(QMainWindow):
     
     def create_human_model(self, x, y, z, track_id):
         """Create human 3D model"""
-        # 暂时禁用3D模型功能
-        print("⚠️ 3D模型功能暂时禁用")
+        print("⚠️ 3D Ban")
         return None
         
         color = ACTION_COLORS.get(self.current_action, (0.5, 0.5, 0.5, 1))
@@ -506,12 +504,12 @@ class HumanTrackingVisualizer(QMainWindow):
             return
         
         print("\n" + "="*60)
-        print("🔍 Radar Debug Information")
+        print(" Radar Debug Information")
         print("="*60)
         
         # Get statistics
         stats = self.radar_reader.get_statistics()
-        print(f"📊 Radar Statistics:")
+        print(f" Radar Statistics:")
         print(f"  Frame count: {stats['frame_count']}")
         print(f"  Error count: {stats['error_count']}")
         print(f"  Frame rate: {stats['frame_rate']:.1f} Hz")
@@ -522,9 +520,9 @@ class HumanTrackingVisualizer(QMainWindow):
         
         # Check serial port status
         if self.radar_reader.cli_com:
-            print(f"📡 CLI port: {self.radar_reader.cli_com.port} - {'Connected' if self.radar_reader.cli_com.is_open else 'Not connected'}")
+            print(f" CLI port: {self.radar_reader.cli_com.port} - {'Connected' if self.radar_reader.cli_com.is_open else 'Not connected'}")
         if self.radar_reader.data_com:
-            print(f"📡 Data port: {self.radar_reader.data_com.port} - {'Connected' if self.radar_reader.data_com.is_open else 'Not connected'}")
+            print(f" Data port: {self.radar_reader.data_com.port} - {'Connected' if self.radar_reader.data_com.is_open else 'Not connected'}")
         
         # Try multiple methods to get data
         print(f"\n🔍 Data retrieval test:")
@@ -532,52 +530,52 @@ class HumanTrackingVisualizer(QMainWindow):
         # Method 1: peek method
         frame_data = self.radar_reader.get_latest_frame_peek()
         if frame_data:
-            print(f"✅ Peek method successful: {list(frame_data.keys())}")
+            print(f" Peek method successful: {list(frame_data.keys())}")
         else:
-            print(f"❌ Peek method failed")
+            print(f" Peek method failed")
         
         # Method 2: queue method
         try:
             frame_data = self.radar_reader.get_latest_frame()
             if frame_data:
-                print(f"✅ Queue method successful: {list(frame_data.keys())}")
+                print(f" Queue method successful: {list(frame_data.keys())}")
             else:
-                print(f"❌ Queue method failed")
+                print(f" Queue method failed")
         except Exception as e:
-            print(f"❌ Queue method exception: {e}")
+            print(f" Queue method exception: {e}")
         
         # Method 3: buffer method
         frame_buffer = self.radar_reader.get_frame_buffer()
         if frame_buffer:
-            print(f"✅ Buffer method successful: {len(frame_buffer)} frames")
+            print(f" Buffer method successful: {len(frame_buffer)} frames")
             if len(frame_buffer) > 0:
                 latest_frame = frame_buffer[-1]
                 print(f"  Latest frame keys: {list(latest_frame.keys())}")
         else:
-            print(f"❌ Buffer method failed")
+            print(f" Buffer method failed")
         
         # Check feature sequence
         feature_sequence = self.radar_reader.get_latest_feature_sequence()
         if feature_sequence is not None:
-            print(f"✅ Feature sequence available: {feature_sequence.shape}")
+            print(f" Feature sequence available: {feature_sequence.shape}")
             if feature_sequence.shape == (30, 6):
-                print(f"   ✓ 6D data format correct: [x, y, z, vx, vy, vz]")
+                print(f"    6D data format correct: [x, y, z, vx, vy, vz]")
                 # Show feature ranges
                 feature_ranges = np.ptp(feature_sequence, axis=0)
                 print(f"   Feature ranges: x={feature_ranges[0]:.3f}, y={feature_ranges[1]:.3f}, z={feature_ranges[2]:.3f}")
                 print(f"                    vx={feature_ranges[3]:.3f}, vy={feature_ranges[4]:.3f}, vz={feature_ranges[5]:.3f}")
             elif feature_sequence.shape[1] == 4:
-                print(f"   ⚠️  4D data format: [y, z, vy, vz] - need to expand to 6D")
+                print(f"     4D data format: [y, z, vy, vz] - need to expand to 6D")
             else:
-                print(f"   ❌ Unknown data format: {feature_sequence.shape}")
+                print(f"    Unknown data format: {feature_sequence.shape}")
         else:
-            print(f"❌ Feature sequence not available")
+            print(f" Feature sequence not available")
         
         # Check data reading thread status
         if hasattr(self.radar_reader, 'reader_thread') and self.radar_reader.reader_thread:
-            print(f"✅ Data reading thread: {self.radar_reader.reader_thread.is_alive()}")
+            print(f" Data reading thread: {self.radar_reader.reader_thread.is_alive()}")
         else:
-            print(f"❌ Data reading thread: Not started")
+            print(f" Data reading thread: Not started")
         
         print("="*60)
     
@@ -608,14 +606,13 @@ class HumanTrackingVisualizer(QMainWindow):
             # Get radar statistics
             radar_stats = self.radar_reader.get_statistics()
             
-            # Action recognition - 直接使用当前预测结果
             # self.current_action 和 self.current_conf 由 action_recognition_loop 更新
             
             # Debug info - reduce frequency
             if current_time - self.last_debug_time > self.debug_interval:
-                print(f"🎯 UI更新状态:")
-                print(f"   当前动作: {self.current_action}")
-                print(f"   置信度: {self.current_conf:.3f}")
+                print(f"UI update status:")
+                print(f"   Current action: {self.current_action}")
+                print(f"   confidence level: {self.current_conf:.3f}")
                 self.last_debug_time = current_time
             
             # Get radar data
@@ -624,12 +621,12 @@ class HumanTrackingVisualizer(QMainWindow):
                 frame_data = self.radar_reader.get_latest_frame()
             except Exception as e:
                 if current_time - self.last_debug_time > self.debug_interval:
-                    print(f"⚠️ Data retrieval exception: {e}")
+                    print(f" Data retrieval exception: {e}")
                     self.last_debug_time = current_time
             
             # Debug info - reduce frequency
             if current_time - self.last_debug_time > self.debug_interval:
-                print(f"📡 3D Visualizer status: frame_data={frame_data is not None}, action={self.current_action}, frames={self.frame_count}")
+                print(f" 3D Visualizer status: frame_data={frame_data is not None}, action={self.current_action}, frames={self.frame_count}")
                 self.last_debug_time = current_time
             
             if not frame_data:
@@ -647,7 +644,7 @@ class HumanTrackingVisualizer(QMainWindow):
             self.frame_count_label.setText(f"Frames: {self.frame_count}")
             self.frame_rate_label.setText(f"Frame Rate: {self.frame_rate:.1f} Hz")
             
-            # 更新动作显示 - 根据动作类型设置颜色
+
             action_text = f"Current Action: {self.current_action.upper()}"
             if self.current_action == 'stand':
                 self.action_label.setStyleSheet("font-size: 14px; font-weight: bold; color: blue;")
@@ -668,7 +665,7 @@ class HumanTrackingVisualizer(QMainWindow):
             
             self.action_label.setText(action_text)
             
-            # 根据置信度设置颜色
+
             confidence_text = f"Confidence: {self.current_conf:.3f}"
             if self.current_conf > 0.8:
                 self.confidence_label.setStyleSheet("font-size: 12px; color: green; font-weight: bold;")
@@ -713,27 +710,27 @@ class HumanTrackingVisualizer(QMainWindow):
                             x, y, z = track[1], track[2], track[3]
                             active_track_ids.add(track_id)
                             
-                            # --- Skeleton --- (暂时禁用避免渲染错误)
+                            # --- Skeleton --- 
                             if self.show_human_models and track_id not in self.human_models:
                                 try:
-                                    # 暂时禁用3D模型功能
-                                    print("⚠️ 3D模型功能暂时禁用")
+                                    
+                                    print(" 3D Ban")
                                     # color = (0, 1, 1, 1)  # Cyan skeleton
                                     # model = HumanModelFactory.create_model(self.human_model_type, track_id, color)
                                     # model.add_to_widget(self.gl_widget)
                                     # self.human_models[track_id] = model
                                 except Exception as e:
-                                    print(f"⚠️ 3D模型创建失败: {e}")
+                                    print(f" 3D faild: {e}")
                                     self.show_human_models = False
                             
                             if self.show_human_models and track_id in self.human_models:
                                 try:
-                                    # 暂时禁用3D模型功能
+                                    
                                     # self.human_models[track_id].update_position(x, y, z)
                                     # self.human_models[track_id].set_visible(True)
                                     pass
                                 except Exception as e:
-                                    print(f"⚠️ 3D模型更新失败: {e}")
+                                    print(f" 3D update faild: {e}")
                             
                             # --- Box ---
                             if track_id not in self.track_boxes:
@@ -779,7 +776,7 @@ class HumanTrackingVisualizer(QMainWindow):
                                 )
                                 self.gl_widget.addItem(text_item)
                                 
-                                print(f"🎭 显示动作标签: {self.current_action.upper()} (置信度: {self.current_conf:.3f})")
+                                print(f" Show action tags: {self.current_action.upper()} (confidence level: {self.current_conf:.3f})")
                         else:
                             if int(track[0]) in self.human_models:
                                 self.human_models[int(track[0])].set_visible(False)
@@ -808,7 +805,7 @@ class HumanTrackingVisualizer(QMainWindow):
                         del self.action_text_items[track_id]
             except Exception as e:
                 if current_time - self.last_debug_time > self.debug_interval:
-                    print(f"⚠️ Cleanup operation exception: {e}")
+                    print(f" Cleanup operation exception: {e}")
                     self.last_debug_time = current_time
             
             # Record update time
@@ -816,15 +813,15 @@ class HumanTrackingVisualizer(QMainWindow):
             self.update_times.append(update_time)
             
         except Exception as e:
-            print(f"❌ Visualization update exception: {e}")
+            print(f" Visualization update exception: {e}")
             import traceback
             traceback.print_exc()
         finally:
             self.is_updating = False
     
     def action_recognition_loop(self):
-        """动作识别循环 - 使用PyTorch模型"""
-        print("🤖 Action recognition loop started")
+
+        print(" Action recognition loop started")
         
         while self.radar_reader and self.radar_reader.is_running:
             try:
@@ -833,22 +830,21 @@ class HumanTrackingVisualizer(QMainWindow):
                 if frame_data and 'pointCloud' in frame_data:
                     points = np.array(frame_data['pointCloud'][:frame_data.get('numDetectedPoints', 0)])
                     
-                    # 调试：检查原始点云数据形状
-                    print(f"🔍 原始点云数据形状: {points.shape}")
+                    print(f"🔍 Shape of raw point cloud data: {points.shape}")
                     
                     if len(points) > 0:
-                        # 确保只使用xyz坐标（前3列）
+
                         if points.shape[1] > 3:
-                            print(f"⚠️ 检测到{points.shape[1]}维点云，只使用前3维(xyz)")
+                            print(f" Detected{points.shape[1]}Pointcloud,Use only the first 3 dimensions(xyz)")
                             points = points[:, :3]
                         
-                        print(f"🔍 处理点云数据: {len(points)} 个点")
+                        print(f" Processing point cloud data: {len(points)} poind")
                         
-                        # 创建序列 - 与训练时完全一致
+             
                         sequence = self.create_sequence(points)
                         
                         if sequence is not None:
-                            print(f"📊 输入序列形状: {sequence.shape}")
+                            print(f" Input sequence shape: {sequence.shape}")
                             
                             # Predict action
                             with torch.no_grad():
@@ -864,17 +860,17 @@ class HumanTrackingVisualizer(QMainWindow):
                                 self.current_action = self.action_labels[predicted_class]
                                 self.current_conf = confidence
                                 
-                                print(f"🎯 动作识别结果: {self.current_action} (置信度: {confidence:.3f})")
+                                print(f" Action recognition results: {self.current_action} (confidence level: {confidence:.3f})")
                         else:
-                            print("⚠️ 无法创建有效序列")
+                            print(" Unable to create a valid sequence")
                             self.current_action = 'unknown'
                             self.current_conf = 0.0
                     else:
-                        print("⚠️ 没有检测到点云数据")
+                        print(" No point cloud data detected")
                         self.current_action = 'unknown'
                         self.current_conf = 0.0
                 else:
-                    print("⚠️ 没有获取到雷达数据")
+                    print(" No radar data obtained")
                     self.current_action = 'unknown'
                     self.current_conf = 0.0
                 
@@ -889,21 +885,20 @@ class HumanTrackingVisualizer(QMainWindow):
                 time.sleep(0.1)
     
     def preprocess_points(self, points):
-        """预处理点云数据 - 与训练时完全一致"""
+
         if len(points) == 0:
-            return np.zeros((100, 4))  # 保证是4维
+            return np.zeros((100, 4)) 
         
-        # 1. 标准化点云（与训练时一致）
-        # 中心化
+
         centroid = np.mean(points, axis=0)
         points = points - centroid
         
-        # 缩放到单位球
+
         max_dist = np.max(np.linalg.norm(points, axis=1))
         if max_dist > 0:
             points = points / max_dist
         
-        # 2. 采样固定数量点（与训练时一致）
+
         if len(points) >= 100:
             indices = np.random.choice(len(points), 100, replace=False)
         else:
@@ -911,35 +906,35 @@ class HumanTrackingVisualizer(QMainWindow):
         
         sampled = points[indices]
         
-        # 3. 添加强度信息（与训练时一致）
+
         intensity = np.ones((100, 1))
-        final_points = np.hstack([sampled, intensity])  # shape: (100, 4)
+        final_points = np.hstack([sampled, intensity])  
         
         return final_points
     
     def create_sequence(self, points):
-        """创建25帧动作序列 - 与训练时完全一致"""
+
         try:
-            # 预处理点云数据
+
             processed_points = self.preprocess_points(points)
             
-            # 创建时序序列（与训练时一致：重复单帧数据到25帧）
+ 
             sequence = np.tile(processed_points, (25, 1, 1))  # (25, 100, 4)
             
-            # 转换为张量并添加batch维度
+
             sequence = torch.FloatTensor(sequence).unsqueeze(0)  # (1, 25, 100, 4)
             
             return sequence
             
         except Exception as e:
-            print(f"❌ 创建序列失败: {e}")
+            print(f" Failed to create sequence: {e}")
             return None
     
     def closeEvent(self, event):
         """Close event"""
         try:
             if hasattr(self, 'action_recognition_thread') and self.action_recognition_thread.is_alive():
-                print("🛑 Stopping action recognition thread...")
+                print(" Stopping action recognition thread...")
                 # Note: Thread will stop automatically when radar_reader.is_running becomes False
             if self.radar_reader:
                 self.radar_reader.stop_reading()

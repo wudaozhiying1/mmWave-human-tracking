@@ -5,11 +5,11 @@ from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 
 def visualize_action_samples():
-    """可视化每个动作的样本点云"""
-    # 加载数据
+    """Visualize sample point clouds for each action"""
+    # Load data
     df = pd.read_csv('extracted_3d_data.csv')
     
-    # 为每个动作选择一个代表性样本
+    # Select a representative sample for each action
     fig = plt.figure(figsize=(15, 5))
     
     actions = ['sit', 'squat', 'stand']
@@ -18,7 +18,7 @@ def visualize_action_samples():
     for i, (action, color) in enumerate(zip(actions, colors)):
         ax = fig.add_subplot(1, 3, i+1, projection='3d')
         
-        # 选择该动作的一个文件的一帧数据
+        # Select one frame of data from one file for this action
         action_data = df[df['action'] == action]
         sample_file = action_data['file_name'].iloc[0]
         sample_frame = action_data[
@@ -42,17 +42,17 @@ def visualize_action_samples():
     plt.show()
 
 def plot_data_statistics():
-    """绘制数据统计信息"""
+    """Plot data statistics"""
     df = pd.read_csv('extracted_3d_data.csv')
     
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     
-    # 动作分布
+    # Action distribution
     action_counts = df['action'].value_counts()
     axes[0, 0].pie(action_counts.values, labels=action_counts.index, autopct='%1.1f%%')
     axes[0, 0].set_title('Action Distribution')
     
-    # XYZ坐标分布
+    # XYZ coordinate distributions
     axes[0, 1].hist(df['x'], bins=50, alpha=0.7, label='X', color='red')
     axes[0, 1].hist(df['y'], bins=50, alpha=0.7, label='Y', color='green')
     axes[0, 1].hist(df['z'], bins=50, alpha=0.7, label='Z', color='blue')
@@ -61,7 +61,7 @@ def plot_data_statistics():
     axes[0, 1].set_ylabel('Frequency')
     axes[0, 1].legend()
     
-    # 每个动作的点数分布
+    # Points per frame distribution for each action
     action_point_counts = df.groupby(['action', 'file_name', 'frame_num']).size()
     for action in df['action'].unique():
         action_data = action_point_counts[action_point_counts.index.get_level_values(0) == action]
@@ -71,9 +71,9 @@ def plot_data_statistics():
     axes[1, 0].set_ylabel('Frequency')
     axes[1, 0].legend()
     
-    # 空间分布（XY平面投影）
+    # Spatial distribution (XY plane projection)
     for action, color in zip(['sit', 'squat', 'stand'], ['red', 'green', 'blue']):
-        action_data = df[df['action'] == action].sample(1000)  # 采样减少点数
+        action_data = df[df['action'] == action].sample(1000)  # Sample to reduce points
         axes[1, 1].scatter(action_data['x'], action_data['y'], 
                           alpha=0.5, s=1, label=action, c=color)
     axes[1, 1].set_title('Spatial Distribution (XY Projection)')
@@ -86,20 +86,20 @@ def plot_data_statistics():
     plt.show()
 
 def visualize_temporal_sequence():
-    """可视化时间序列数据"""
+    """Visualize temporal sequence data"""
     df = pd.read_csv('extracted_3d_data.csv')
     
-    # 选择一个文件的时间序列
+    # Select a file's temporal sequence
     sample_file = df['file_name'].iloc[0]
     sample_action = df[df['file_name'] == sample_file]['action'].iloc[0]
     file_data = df[df['file_name'] == sample_file].sort_values('frame_num')
     
-    # 计算每帧的质心
+    # Calculate centroid for each frame
     frame_centroids = file_data.groupby('frame_num')[['x', 'y', 'z']].mean()
     
     fig = plt.figure(figsize=(12, 8))
     
-    # 3D轨迹
+    # 3D trajectory
     ax1 = fig.add_subplot(2, 2, 1, projection='3d')
     ax1.plot(frame_centroids['x'], frame_centroids['y'], frame_centroids['z'], 'b-o', alpha=0.7)
     ax1.set_title(f'3D Trajectory - {sample_action}')
@@ -107,7 +107,7 @@ def visualize_temporal_sequence():
     ax1.set_ylabel('Y')
     ax1.set_zlabel('Z')
     
-    # XY轨迹
+    # XY trajectory
     ax2 = fig.add_subplot(2, 2, 2)
     ax2.plot(frame_centroids['x'], frame_centroids['y'], 'r-o', alpha=0.7)
     ax2.set_title('XY Trajectory')
@@ -115,7 +115,7 @@ def visualize_temporal_sequence():
     ax2.set_ylabel('Y')
     ax2.grid(True)
     
-    # 时间序列
+    # Temporal sequence
     ax3 = fig.add_subplot(2, 2, 3)
     ax3.plot(frame_centroids.index, frame_centroids['x'], label='X', alpha=0.7)
     ax3.plot(frame_centroids.index, frame_centroids['y'], label='Y', alpha=0.7)
@@ -126,7 +126,7 @@ def visualize_temporal_sequence():
     ax3.legend()
     ax3.grid(True)
     
-    # 每帧点数
+    # Points per frame
     points_per_frame = file_data.groupby('frame_num').size()
     ax4 = fig.add_subplot(2, 2, 4)
     ax4.plot(points_per_frame.index, points_per_frame.values, 'g-o', alpha=0.7)
@@ -140,7 +140,7 @@ def visualize_temporal_sequence():
     plt.show()
 
 def main():
-    """主函数"""
+    """Main function"""
     print("=== Visualizing 3D Point Cloud Data ===")
     
     print("1. Creating action sample visualizations...")

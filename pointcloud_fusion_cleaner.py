@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-基于TI雷达点云的多帧融合与聚类清洗器
-参考论文：基于毫米波雷达三维点云的人体动作识别数据集与方法
+Multi-frame Fusion and Clustering Cleaner for TI Radar Point Cloud
+Reference Paper: Human Action Recognition Dataset and Method Based on Millimeter Wave Radar 3D Point Cloud
 """
 
 import json
@@ -17,30 +17,30 @@ from mpl_toolkits.mplot3d import Axes3D
 class PointCloudFusionCleaner:
     def __init__(self, data_folder="radar_data"):
         """
-        初始化点云融合清洗器
+        Initialize point cloud fusion cleaner
         Args:
-            data_folder: 数据文件夹路径
+            data_folder: Data folder path
         """
         self.data_folder = data_folder
-        self.frames_per_sample = 6  # 6帧融合为一个样本
+        self.frames_per_sample = 6  # 6 frames fused into one sample
         
     def load_pointcloud_data(self, file_path):
-        """加载点云数据文件"""
+        """Load point cloud data file"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             return data
         except Exception as e:
-            print(f"❌ 加载文件失败 {file_path}: {e}")
+            print(f"Failed to load file {file_path}: {e}")
             return []
     
     def extract_xyz_points(self, point_data):
         """
-        从点云数据中提取x,y,z坐标
+        Extract x,y,z coordinates from point cloud data
         Args:
-            point_data: 点云数据列表
+            point_data: Point cloud data list
         Returns:
-            points: numpy数组，形状为(n_points, 3)
+            points: numpy array with shape (n_points, 3)
         """
         points = []
         for item in point_data:
@@ -51,17 +51,17 @@ class PointCloudFusionCleaner:
     
     def group_frames_by_time(self, point_data, time_window=0.1):
         """
-        按时间窗口分组帧数据（更短的时间窗口以保持帧的连续性）
+        Group frame data by time window (shorter time window to maintain frame continuity)
         Args:
-            point_data: 点云数据列表
-            time_window: 时间窗口（秒）
+            point_data: Point cloud data list
+            time_window: Time window (seconds)
         Returns:
-            grouped_frames: 分组后的帧数据
+            grouped_frames: Grouped frame data
         """
         if not point_data:
             return []
         
-        # 按时间戳排序
+        # Sort by timestamp
         sorted_data = sorted(point_data, key=lambda x: x.get('timestamp', 0))
         
         grouped_frames = []
@@ -80,7 +80,7 @@ class PointCloudFusionCleaner:
             
             last_timestamp = timestamp
         
-        # 添加最后一组
+        # Add the last group
         if current_group:
             grouped_frames.append(current_group)
         
@@ -88,11 +88,11 @@ class PointCloudFusionCleaner:
     
     def multi_frame_fusion(self, frame_groups):
         """
-        多帧融合：将6帧的点云数据融合
+        Multi-frame fusion: fuse 6 frames of point cloud data
         Args:
-            frame_groups: 分组后的帧数据
+            frame_groups: Grouped frame data
         Returns:
-            fused_points: 融合后的点云数据
+            fused_points: Fused point cloud data
         """
         all_points = []
         
@@ -104,35 +104,35 @@ class PointCloudFusionCleaner:
         if not all_points:
             return np.empty((0, 3))
         
-        # 将所有帧的点云合并
+        # Merge point clouds from all frames
         fused_points = np.vstack(all_points)
         return fused_points
     
     def dbscan_clustering(self, points, eps=0.5, min_samples=3):
         """
-        DBSCAN聚类，分离目标和噪声点
+        DBSCAN clustering to separate targets and noise points
         Args:
-            points: 点云数据，形状为(n_points, 3)
-            eps: 邻域半径
-            min_samples: 最小样本数
+            points: Point cloud data with shape (n_points, 3)
+            eps: Neighborhood radius
+            min_samples: Minimum number of samples
         Returns:
-            target_points: 目标点云
-            noise_points: 噪声点云
+            target_points: Target point cloud
+            noise_points: Noise point cloud
         """
         if len(points) == 0:
             return np.empty((0, 3)), np.empty((0, 3))
         
-        # 标准化数据
+        # Standardize data
         scaler = StandardScaler()
         points_scaled = scaler.fit_transform(points)
         
-        # DBSCAN聚类
+        # DBSCAN clustering
         clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(points_scaled)
         labels = clustering.labels_
         
-        # 分离目标和噪声点
-        target_mask = labels != -1  # 非噪声点
-        noise_mask = labels == -1   # 噪声点
+        # Separate targets and noise points
+        target_mask = labels != -1  # Non-noise points
+        noise_mask = labels == -1   # Noise points
         
         target_points = points[target_mask]
         noise_points = points[noise_mask]
@@ -141,11 +141,11 @@ class PointCloudFusionCleaner:
     
     def calculate_density_features(self, points):
         """
-        计算点云密度特征
+        Calculate point cloud density features
         Args:
-            points: 点云数据
+            points: Point cloud data
         Returns:
-            features: 密度特征字典
+            features: Density feature dictionary
         """
         if len(points) == 0:
             return {
@@ -155,27 +155,27 @@ class PointCloudFusionCleaner:
                 'concentration_ratio': 0.0
             }
         
-        # 基本统计
+        # Basic statistics
         num_points = len(points)
         
-        # 计算空间范围
+        # Calculate spatial range
         x_range = np.max(points[:, 0]) - np.min(points[:, 0])
         y_range = np.max(points[:, 1]) - np.min(points[:, 1])
         z_range = np.max(points[:, 2]) - np.min(points[:, 2])
         
-        # 空间体积
+        # Spatial volume
         spatial_volume = x_range * y_range * z_range
         
-        # 点云密度（点数/体积）
+        # Point cloud density (points/volume)
         point_density = num_points / (spatial_volume + 1e-6)
         
-        # 计算点云中心
+        # Calculate point cloud center
         center = np.mean(points, axis=0)
         
-        # 计算到中心的距离
+        # Calculate distance to center
         distances = np.linalg.norm(points - center, axis=1)
         
-        # 集中度比率（近距离点的比例）
+        # Concentration ratio (proportion of close points)
         concentration_ratio = np.sum(distances < np.mean(distances)) / num_points
         
         return {
@@ -193,34 +193,34 @@ class PointCloudFusionCleaner:
     
     def create_fused_sample(self, frame_groups):
         """
-        创建融合样本
+        Create fused sample
         Args:
-            frame_groups: 分组后的帧数据
+            frame_groups: Grouped frame data
         Returns:
-            sample: 融合后的样本
+            sample: Fused sample
         """
         if len(frame_groups) < self.frames_per_sample:
             return None
         
-        # 取前6帧进行融合
+        # Take first 6 frames for fusion
         sample_frames = frame_groups[:self.frames_per_sample]
         
-        # 多帧融合
+        # Multi-frame fusion
         fused_points = self.multi_frame_fusion(sample_frames)
         
         if len(fused_points) == 0:
             return None
         
-        # DBSCAN聚类
+        # DBSCAN clustering
         target_points, noise_points = self.dbscan_clustering(fused_points)
         
-        # 计算特征
+        # Calculate features
         target_features = self.calculate_density_features(target_points)
         noise_features = self.calculate_density_features(noise_points)
         
-        # 创建样本
+        # Create sample
         sample = {
-            'sample_id': 0,  # 将在外部设置
+            'sample_id': 0,  # Will be set externally
             'start_timestamp': sample_frames[0][0].get('timestamp', 0),
             'end_timestamp': sample_frames[-1][-1].get('timestamp', 0),
             'num_frames': len(sample_frames),
@@ -235,17 +235,17 @@ class PointCloudFusionCleaner:
     
     def visualize_fusion_result(self, original_points, fused_points, target_points, noise_points, save_path=None):
         """
-        可视化融合结果（类似论文Figure 10）
+        Visualize fusion results (similar to Figure 10 in the paper)
         Args:
-            original_points: 原始单帧点云
-            fused_points: 融合后的点云
-            target_points: 目标点云
-            noise_points: 噪声点云
-            save_path: 保存路径
+            original_points: Original single frame point cloud
+            fused_points: Fused point cloud
+            target_points: Target point cloud
+            noise_points: Noise point cloud
+            save_path: Save path
         """
         fig = plt.figure(figsize=(15, 6))
         
-        # 原始单帧点云
+        # Original single frame point cloud
         ax1 = fig.add_subplot(121, projection='3d')
         if len(original_points) > 0:
             ax1.scatter(original_points[:, 0], original_points[:, 1], original_points[:, 2], 
@@ -253,10 +253,10 @@ class PointCloudFusionCleaner:
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
         ax1.set_zlabel('Z')
-        ax1.set_title('(a) 单帧点云 (Single Frame Point Cloud)')
+        ax1.set_title('(a) Single Frame Point Cloud')
         ax1.legend()
         
-        # 融合聚类后的点云
+        # Fused and clustered point cloud
         ax2 = fig.add_subplot(122, projection='3d')
         if len(target_points) > 0:
             ax2.scatter(target_points[:, 0], target_points[:, 1], target_points[:, 2], 
@@ -267,55 +267,55 @@ class PointCloudFusionCleaner:
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
         ax2.set_zlabel('Z')
-        ax2.set_title('(b) 融合聚类后的点云 (Fused and Clustered Point Cloud)')
+        ax2.set_title('(b) Fused and Clustered Point Cloud')
         ax2.legend()
         
         plt.tight_layout()
         
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"📊 可视化结果已保存: {save_path}")
+            print(f"Visualization result saved: {save_path}")
         
         plt.show()
     
     def clean_and_save_data(self, input_file, output_file, visualize=False):
         """
-        清洗并保存数据
+        Clean and save data
         Args:
-            input_file: 输入文件路径
-            output_file: 输出文件路径
-            visualize: 是否生成可视化
+            input_file: Input file path
+            output_file: Output file path
+            visualize: Whether to generate visualization
         """
-        print(f"🧹 清洗数据: {input_file}")
+        print(f"Cleaning data: {input_file}")
         
-        # 加载原始数据
+        # Load original data
         raw_data = self.load_pointcloud_data(input_file)
         if not raw_data:
-            print(f"⚠️  文件为空或加载失败: {input_file}")
+            print(f"File is empty or failed to load: {input_file}")
             return
         
-        print(f"📊 原始数据: {len(raw_data)} 个数据点")
+        print(f"Original data: {len(raw_data)} data points")
         
-        # 按时间分组
+        # Group by time
         frame_groups = self.group_frames_by_time(raw_data)
-        print(f"📦 分组后: {len(frame_groups)} 个时间窗口")
+        print(f"After grouping: {len(frame_groups)} time windows")
         
-        # 创建融合样本
+        # Create fused samples
         samples = []
         for i in range(0, len(frame_groups), self.frames_per_sample):
             sample_frames = frame_groups[i:i + self.frames_per_sample]
             
             if len(sample_frames) == self.frames_per_sample:
-                # 获取原始单帧点云用于对比
+                # Get original single frame point cloud for comparison
                 original_points = self.extract_xyz_points(sample_frames[0])
                 
-                # 创建融合样本
+                # Create fused sample
                 sample = self.create_fused_sample(sample_frames)
                 if sample:
                     sample['sample_id'] = len(samples)
                     samples.append(sample)
                     
-                    # 可视化第一个样本
+                    # Visualize first sample
                     if visualize and len(samples) == 1:
                         fused_points = np.array(sample['target_points'] + sample['noise_points'])
                         target_points = np.array(sample['target_points'])
@@ -324,119 +324,119 @@ class PointCloudFusionCleaner:
                         viz_path = output_file.replace('.json', '_visualization.png')
                         self.visualize_fusion_result(original_points, fused_points, target_points, noise_points, viz_path)
         
-        print(f"🎯 创建样本: {len(samples)} 个融合样本")
+        print(f"Created samples: {len(samples)} fused samples")
         
-        # 保存清洗后的数据
+        # Save cleaned data
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(samples, f, indent=2, ensure_ascii=False)
         
-        print(f"💾 清洗后数据已保存: {output_file}")
+        print(f"Cleaned data saved: {output_file}")
         
         return samples
     
     def process_all_data(self, visualize=False):
-        """处理所有数据文件夹"""
-        print("🚀 开始基于论文方法清洗所有雷达数据")
+        """Process all data folders"""
+        print("Starting to clean all radar data based on paper method")
         print("=" * 60)
         
-        # 查找所有数据文件夹
+        # Find all data folders
         data_dirs = ['sit', 'squat', 'stand']
         
         for data_dir in data_dirs:
             dir_path = os.path.join(self.data_folder, data_dir)
             if not os.path.exists(dir_path):
-                print(f"⚠️  文件夹不存在: {dir_path}")
+                print(f"Folder does not exist: {dir_path}")
                 continue
             
-            print(f"\n📁 处理文件夹: {data_dir}")
+            print(f"\nProcessing folder: {data_dir}")
             
-            # 查找所有JSON文件
+            # Find all JSON files
             json_files = glob.glob(os.path.join(dir_path, "**/*.json"), recursive=True)
             
             if not json_files:
-                print(f"⚠️  未找到JSON文件: {dir_path}")
+                print(f"No JSON files found: {dir_path}")
                 continue
             
-            # 创建输出文件夹
+            # Create output folder
             output_dir = os.path.join(self.data_folder, f"{data_dir}_fused")
             os.makedirs(output_dir, exist_ok=True)
             
             total_samples = 0
             
             for json_file in json_files:
-                # 生成输出文件名
+                # Generate output filename
                 rel_path = os.path.relpath(json_file, dir_path)
                 output_file = os.path.join(output_dir, f"fused_{rel_path}")
                 
-                # 确保输出目录存在
+                # Ensure output directory exists
                 os.makedirs(os.path.dirname(output_file), exist_ok=True)
                 
-                # 清洗数据
+                # Clean data
                 samples = self.clean_and_save_data(json_file, output_file, visualize)
                 if samples:
                     total_samples += len(samples)
             
-            print(f"✅ {data_dir} 处理完成，共生成 {total_samples} 个融合样本")
+            print(f"{data_dir} processing completed, generated {total_samples} fused samples")
         
-        print("\n🎉 所有数据融合清洗完成！")
+        print("\nAll data fusion cleaning completed!")
 
     def process_stand_data(self, visualize=False):
-        """专门处理stand数据"""
-        print("🚀 开始处理stand点云数据")
+        """Specifically process stand data"""
+        print("Starting to process stand point cloud data")
         print("=" * 60)
         
-        # stand原始数据目录
+        # Stand original data directory
         stand_dir = os.path.join(self.data_folder, 'stand', 'pointcloud')
         if not os.path.exists(stand_dir):
-            print(f"⚠️  stand目录不存在: {stand_dir}")
+            print(f"Stand directory does not exist: {stand_dir}")
             return
         
-        # 输出目录
+        # Output directory
         output_dir = os.path.join(self.data_folder, 'stand_data', 'fused_pointcloud')
         os.makedirs(output_dir, exist_ok=True)
         
-        print(f"📁 输入目录: {stand_dir}")
-        print(f"📁 输出目录: {output_dir}")
+        print(f"Input directory: {stand_dir}")
+        print(f"Output directory: {output_dir}")
         
-        # 查找所有JSON文件
+        # Find all JSON files
         json_files = glob.glob(os.path.join(stand_dir, "*.json"))
         
         if not json_files:
-            print(f"⚠️  未找到JSON文件: {stand_dir}")
+            print(f"No JSON files found: {stand_dir}")
             return
         
-        print(f"📊 找到 {len(json_files)} 个点云文件")
+        print(f"Found {len(json_files)} point cloud files")
         
         total_samples = 0
         
         for json_file in json_files:
-            # 生成输出文件名
+            # Generate output filename
             base_name = os.path.basename(json_file)
             output_file = os.path.join(output_dir, base_name)
             
-            print(f"\n📄 处理文件: {base_name}")
+            print(f"\nProcessing file: {base_name}")
             
-            # 清洗数据
+            # Clean data
             samples = self.clean_and_save_data(json_file, output_file, visualize)
             if samples:
                 total_samples += len(samples)
-                print(f"✅ 生成 {len(samples)} 个融合样本")
+                print(f"Generated {len(samples)} fused samples")
         
-        print(f"\n🎉 stand数据处理完成！")
-        print(f"📊 总共生成 {total_samples} 个融合样本")
-        print(f"📁 输出目录: {output_dir}")
+        print(f"\nStand data processing completed!")
+        print(f"Total generated {total_samples} fused samples")
+        print(f"Output directory: {output_dir}")
         
         return total_samples
 
 def main():
-    """主函数"""
-    print("🧹 基于论文方法的点云融合清洗器")
+    """Main function"""
+    print("Point Cloud Fusion Cleaner Based on Paper Method")
     print("=" * 60)
     
-    # 创建清洗器
+    # Create cleaner
     cleaner = PointCloudFusionCleaner("radar_data")
     
-    # 专门处理stand数据
+    # Specifically process stand data
     cleaner.process_stand_data(visualize=True)
 
 if __name__ == "__main__":

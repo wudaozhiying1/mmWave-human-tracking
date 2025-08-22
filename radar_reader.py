@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-雷达数据读取器
-从串口4和6读取IWR6843雷达数据
+Radar Data Reader
+Read IWR6843 radar data from COM4 and COM6 serial ports
 """
 
 import serial
@@ -13,7 +13,7 @@ import os
 import sys
 from datetime import datetime
 
-# 添加decoding目录到Python路径
+# Add decoding directory to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 decoding_dir = os.path.join(current_dir, 'decoding')
 if decoding_dir not in sys.path:
@@ -24,62 +24,62 @@ try:
     from demo_defines import *
     from tlv_defines import *
 except ImportError as e:
-    print(f"❌ 导入错误: {e}")
-    print(f"📁 当前目录: {current_dir}")
-    print(f"📁 decoding目录: {decoding_dir}")
+    print(f"Import error: {e}")
+    print(f"Current directory: {current_dir}")
+    print(f"Decoding directory: {decoding_dir}")
     raise
 
 class RadarReader:
     def __init__(self, cli_com='COM4', data_com='COM6', baud_rate=921600):
         """
-        初始化雷达读取器
+        Initialize radar reader
         Args:
-            cli_com: CLI串口名称 (COM4)
-            data_com: 数据串口名称 (COM6)
-            baud_rate: 波特率
+            cli_com: CLI serial port name (COM4)
+            data_com: Data serial port name (COM6)
+            baud_rate: Baud rate
         """
         self.cli_com = cli_com
         self.data_com = data_com
         self.baud_rate = baud_rate
         
-        # 串口连接
+        # Serial connections
         self.cli_serial = None
         self.data_serial = None
         
-        # 控制标志
+        # Control flags
         self.is_running = False
         
-        # 数据存储
+        # Data storage
         self.data4 = []
-        self.raw_frames = []  # 存储原始帧数据
+        self.raw_frames = []  # Store raw frame data
         
-        # 魔法字
+        # Magic word
         self.MAGIC_WORD = b'\x02\x01\x04\x03\x06\x05\x08\x07'
         
-        # 创建数据保存文件夹
+        # Create data save folder
         self.create_data_folder()
         
-        print(f"🚀 雷达读取器初始化完成")
-        print(f"📡 CLI串口: {cli_com}")
-        print(f"📡 数据串口: {data_com}")
-        print(f"⚡ 波特率: {baud_rate}")
+        print(f"Radar reader initialization completed")
+        print(f"CLI serial port: {cli_com}")
+        print(f"Data serial port: {data_com}")
+        print(f"Baud rate: {baud_rate}")
         
     def create_data_folder(self):
-        """创建数据保存文件夹"""
+        """Create data save folder"""
         try:
-            # 创建主文件夹
+            # Create main folder
             self.data_folder = "radar_data"
             if not os.path.exists(self.data_folder):
                 os.makedirs(self.data_folder)
-                print(f"📁 创建数据文件夹: {self.data_folder}")
+                print(f"Created data folder: {self.data_folder}")
             
-            # 创建时间戳子文件夹
+            # Create timestamp subfolder
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.session_folder = os.path.join(self.data_folder, f"session_{timestamp}")
             os.makedirs(self.session_folder)
-            print(f"📁 创建会话文件夹: {self.session_folder}")
+            print(f"Created session folder: {self.session_folder}")
             
-            # 创建子文件夹
+            # Create subfolders
             self.pointcloud_folder = os.path.join(self.session_folder, "pointcloud")
             self.tracking_folder = os.path.join(self.session_folder, "tracking")
             self.raw_folder = os.path.join(self.session_folder, "raw")
@@ -88,167 +88,167 @@ class RadarReader:
             os.makedirs(self.tracking_folder)
             os.makedirs(self.raw_folder)
             
-            print(f"📁 创建子文件夹:")
-            print(f"   📊 点云数据: {self.pointcloud_folder}")
-            print(f"   🎯 跟踪数据: {self.tracking_folder}")
-            print(f"   📦 原始数据: {self.raw_folder}")
+            print(f"Created subfolders:")
+            print(f"   Point cloud data: {self.pointcloud_folder}")
+            print(f"   Tracking data: {self.tracking_folder}")
+            print(f"   Raw data: {self.raw_folder}")
             
         except Exception as e:
-            print(f"❌ 创建文件夹失败: {e}")
-            # 使用当前目录作为备选
+            print(f"Failed to create folders: {e}")
+            # Use current directory as fallback
             self.session_folder = "."
             self.pointcloud_folder = "."
             self.tracking_folder = "."
             self.raw_folder = "."
         
     def connect_ports(self):
-        """连接串口"""
+        """Connect serial ports"""
         try:
-            print(f"\n🔌 正在连接串口...")
+            print(f"\nConnecting serial ports...")
             
-            # 连接CLI串口
-            print(f"   📡 连接CLI串口: {self.cli_com}")
+            # Connect CLI serial port
+            print(f"   Connecting CLI serial port: {self.cli_com}")
             self.cli_serial = serial.Serial(
                 self.cli_com, 
-                115200,  # CLI串口通常使用115200波特率
+                115200,  # CLI serial port usually uses 115200 baud rate
                 timeout=1
             )
-            print(f"   ✅ CLI串口连接成功")
+            print(f"   CLI serial port connected successfully")
             
-            # 连接数据串口
-            print(f"   📡 连接数据串口: {self.data_com}")
+            # Connect data serial port
+            print(f"   Connecting data serial port: {self.data_com}")
             self.data_serial = serial.Serial(
                 self.data_com, 
-                self.baud_rate,  # 数据串口使用921600波特率
+                self.baud_rate,  # Data serial port uses 921600 baud rate
                 timeout=1
             )
-            print(f"   ✅ 数据串口连接成功")
+            print(f"   Data serial port connected successfully")
             
-            print(f"✅ 所有串口连接成功")
+            print(f"All serial ports connected successfully")
             return True
             
         except Exception as e:
-            print(f"❌ 串口连接失败: {e}")
+            print(f"Serial port connection failed: {e}")
             return False
     
     def load_config_file(self, config_path):
-        """加载配置文件"""
+        """Load configuration file"""
         try:
             with open(config_path, 'r') as f:
                 return [line.strip() for line in f.readlines()]
         except Exception as e:
-            print(f"❌ 加载配置文件失败: {e}")
+            print(f"Failed to load configuration file: {e}")
             return []
     
     def send_config(self, config_lines):
-        """发送配置命令到CLI串口 - 使用gui_parser.py的方法"""
+        """Send configuration commands to CLI serial port - using gui_parser.py method"""
         try:
-            print(f"\n📋 正在发送配置文件...")
+            print(f"\nSending configuration file...")
             
-            # 移除空行和注释行
+            # Remove empty lines and comment lines
             cfg = [line for line in config_lines if line.strip() and not line.startswith('%')]
-            # 确保每行以\n结尾
+            # Ensure each line ends with \n
             cfg = [line + '\n' if not line.endswith('\n') else line for line in cfg]
             
             for line in cfg:
-                time.sleep(0.03)  # 行延迟
+                time.sleep(0.03)  # Line delay
                 
-                # 发送命令
+                # Send command
                 self.cli_serial.write(line.encode())
                 
-                # 读取确认
+                # Read acknowledgment
                 ack = self.cli_serial.readline()
                 if len(ack) == 0:
-                    print("❌ 串口超时，设备可能处于闪烁模式")
+                    print("Serial port timeout, device may be in flash mode")
                     return False
                 
-                print(f"   📤 {line.strip()} -> {ack.decode().strip()}")
+                print(f"   {line.strip()} -> {ack.decode().strip()}")
                 
-                # 读取第二行确认
+                # Read second line acknowledgment
                 ack = self.cli_serial.readline()
                 if ack:
-                    print(f"   📤 确认: {ack.decode().strip()}")
+                    print(f"   Acknowledgment: {ack.decode().strip()}")
             
-            # 给缓冲区一些时间清理
+            # Give buffer some time to clear
             time.sleep(0.03)
             self.cli_serial.reset_input_buffer()
             
-            print(f"✅ 配置文件发送完成")
+            print(f"Configuration file sent successfully")
             return True
             
         except Exception as e:
-            print(f"❌ 发送配置文件失败: {e}")
+            print(f"Failed to send configuration file: {e}")
             return False
     
     def disconnect_ports(self):
-        """断开串口连接"""
+        """Disconnect serial ports"""
         if self.cli_serial and self.cli_serial.is_open:
             self.cli_serial.close()
         if self.data_serial and self.data_serial.is_open:
             self.data_serial.close()
-        print("🔌 串口已断开")
+        print("Serial ports disconnected")
     
     def read_frame(self, serial_port):
-        """读取一帧数据 - 使用gui_parser.py的方法"""
+        """Read one frame of data - using gui_parser.py method"""
         try:
-            # 查找魔法字
+            # Find magic word
             index = 0
             magicByte = serial_port.read(1)
             frameData = bytearray(b'')
             
             while True:
-                # 检查是否有数据
+                # Check if there is data
                 if len(magicByte) < 1:
-                    print("❌ 串口超时，没有数据")
+                    print("Serial port timeout, no data")
                     return None
                 
-                # 找到匹配的字节
+                # Find matching byte
                 if magicByte[0] == self.MAGIC_WORD[index]:
                     index += 1
                     frameData.append(magicByte[0])
-                    if index == 8:  # 找到完整的魔法字
+                    if index == 8:  # Found complete magic word
                         break
                     magicByte = serial_port.read(1)
                 else:
-                    # 重置索引
+                    # Reset index
                     if index == 0:
                         magicByte = serial_port.read(1)
                     index = 0
                     frameData = bytearray(b'')
             
-            # 读取版本号
+            # Read version number
             versionBytes = serial_port.read(4)
             frameData += bytearray(versionBytes)
             
-            # 读取长度
+            # Read length
             lengthBytes = serial_port.read(4)
             frameData += bytearray(lengthBytes)
             frameLength = int.from_bytes(lengthBytes, byteorder='little')
             
-            # 减去已经读取的字节（魔法字、版本、长度）
+            # Subtract already read bytes (magic word, version, length)
             frameLength -= 16
             
-            # 读取帧的其余部分
+            # Read the rest of the frame
             frameData += bytearray(serial_port.read(frameLength))
             
             return frameData
             
         except Exception as e:
-            print(f"❌ 读取帧数据失败: {e}")
+            print(f"Failed to read frame data: {e}")
             return None
     
     def parse_frame(self, frame_data):
-        """解析帧数据"""
+        """Parse frame data"""
         try:
             parsed_data = parseStandardFrame(frame_data)
             return parsed_data
         except Exception as e:
-            print(f"❌ 解析帧数据失败: {e}")
+            print(f"Failed to parse frame data: {e}")
             return None
     
     def read_port_data(self, serial_port, port_name, data_list):
-        """读取单个串口的数据"""
-        print(f"📊 开始读取{port_name}数据...")
+        """Read data from single serial port"""
+        print(f"Starting to read {port_name} data...")
         
         frame_count = 0
         last_debug_time = time.time()
@@ -258,9 +258,9 @@ class RadarReader:
                 frame_data = self.read_frame(serial_port)
                 if frame_data:
                     frame_count += 1
-                    print(f"📦 读取到第 {frame_count} 帧数据，长度: {len(frame_data)} 字节")
+                    print(f"Read frame {frame_count}, length: {len(frame_data)} bytes")
                     
-                    # 保存原始帧数据
+                    # Save raw frame data
                     raw_frame_info = {
                         'timestamp': time.time(),
                         'frame_number': frame_count,
@@ -269,24 +269,24 @@ class RadarReader:
                     }
                     self.raw_frames.append(raw_frame_info)
                     
-                    # 解析数据
+                    # Parse data
                     parsed_data = self.parse_frame(frame_data)
                     if parsed_data:
-                        print(f"✅ 解析成功，包含 {len(parsed_data)} 个TLV")
+                        print(f"Parsed successfully, contains {len(parsed_data)} TLVs")
                         
-                        # 提取点云数据
+                        # Extract point cloud data
                         if 'pointCloud' in parsed_data:
                             points = parsed_data['pointCloud']
                             num_points = parsed_data.get('numDetectedPoints', 0)
-                            print(f"🎯 检测到 {num_points} 个点云点")
+                            print(f"Detected {num_points} point cloud points")
                             
                             if num_points > 0:
-                                print(f"📊 点云数据示例:")
-                                for i in range(min(3, num_points)):  # 只显示前3个点
+                                print(f"Point cloud data example:")
+                                for i in range(min(3, num_points)):  # Only show first 3 points
                                     if i < len(points):
                                         point = points[i]
                                         if len(point) >= 3:
-                                            print(f"   点{i+1}: x={point[0]:.2f}, y={point[1]:.2f}, z={point[2]:.2f}")
+                                            print(f"   Point{i+1}: x={point[0]:.2f}, y={point[1]:.2f}, z={point[2]:.2f}")
                             
                             for i in range(num_points):
                                 if i < len(points):
@@ -304,14 +304,14 @@ class RadarReader:
                                         }
                                         data_list.append(coord)
                         else:
-                            print(f"⚠️  未找到点云数据")
-                            print(f"📋 可用数据键: {list(parsed_data.keys())}")
+                            print(f"Point cloud data not found")
+                            print(f"Available data keys: {list(parsed_data.keys())}")
                         
-                        # 提取跟踪数据
+                        # Extract tracking data
                         if 'trackData' in parsed_data:
                             tracks = parsed_data['trackData']
                             num_tracks = parsed_data.get('numDetectedTracks', 0)
-                            print(f"🎯 检测到 {num_tracks} 个跟踪目标")
+                            print(f"Detected {num_tracks} tracking targets")
                             
                             for i in range(num_tracks):
                                 if i < len(tracks):
@@ -327,54 +327,54 @@ class RadarReader:
                                         'vel_y': float(track[5]),
                                         'vel_z': float(track[6])
                                     }
-                                    print(f"🎯 跟踪目标 {track_info['track_id']}: 位置=({track_info['pos_x']:.2f}, {track_info['pos_y']:.2f}, {track_info['pos_z']:.2f})")
+                                    print(f"Tracking target {track_info['track_id']}: position=({track_info['pos_x']:.2f}, {track_info['pos_y']:.2f}, {track_info['pos_z']:.2f})")
                     else:
-                        print(f"❌ 帧数据解析失败")
+                        print(f"Frame data parsing failed")
                 else:
-                    # 每10秒打印一次调试信息
+                    # Print debug info every 10 seconds
                     current_time = time.time()
                     if current_time - last_debug_time >= 10:
-                        print(f"⏳ 等待数据中... 串口状态: {serial_port.in_waiting} 字节可用")
+                        print(f"Waiting for data... Serial port status: {serial_port.in_waiting} bytes available")
                         last_debug_time = current_time
                 
-                time.sleep(0.01)  # 短暂休眠
+                time.sleep(0.01)  # Brief sleep
                 
             except Exception as e:
-                print(f"❌ {port_name} 读取异常: {e}")
+                print(f"{port_name} read exception: {e}")
                 time.sleep(0.1)
         
-        print(f"⏹️  {port_name} 读取线程已停止")
+        print(f"{port_name} read thread stopped")
     
     def start_reading(self):
-        """开始读取数据"""
+        """Start reading data"""
         if not self.data_serial:
-            print("❌ 数据串口未连接")
+            print("Data serial port not connected")
             return False
         
         self.is_running = True
         
-        # 启动数据读取线程
+        # Start data reading thread
         thread = threading.Thread(
             target=self.read_port_data,
-            args=(self.data_serial, 'RADAR', self.data4)  # 使用data4存储所有数据
+            args=(self.data_serial, 'RADAR', self.data4)  # Use data4 to store all data
         )
         thread.daemon = True
         thread.start()
         
-        print("✅ 数据读取已启动")
+        print("Data reading started")
         return True
     
     def stop_reading(self):
-        """停止读取数据"""
+        """Stop reading data"""
         self.is_running = False
-        print("⏹️  正在停止数据读取...")
-        time.sleep(2)  # 等待线程结束
+        print("Stopping data reading...")
+        time.sleep(2)  # Wait for thread to end
     
     def save_data(self, filename_prefix="radar_data"):
-        """保存数据到文件"""
+        """Save data to file"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        # 分离点云数据和跟踪数据
+        # Separate point cloud data and tracking data
         pointcloud_data = []
         tracking_data = []
         
@@ -384,54 +384,54 @@ class RadarReader:
             else:
                 pointcloud_data.append(item)
         
-        # 保存点云数据
+        # Save point cloud data
         if pointcloud_data:
             filename = os.path.join(self.pointcloud_folder, f"pointcloud_{timestamp}.json")
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(pointcloud_data, f, indent=2, ensure_ascii=False)
-            print(f"💾 点云数据已保存: {filename} ({len(pointcloud_data)} 个点)")
+            print(f"Point cloud data saved: {filename} ({len(pointcloud_data)} points)")
         
-        # 保存跟踪数据
+        # Save tracking data
         if tracking_data:
             filename = os.path.join(self.tracking_folder, f"tracking_{timestamp}.json")
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(tracking_data, f, indent=2, ensure_ascii=False)
-            print(f"💾 跟踪数据已保存: {filename} ({len(tracking_data)} 个目标)")
+            print(f"Tracking data saved: {filename} ({len(tracking_data)} targets)")
         
-        # 保存完整数据
+        # Save complete data
         if self.data4:
             filename = os.path.join(self.session_folder, f"complete_data_{timestamp}.json")
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(self.data4, f, indent=2, ensure_ascii=False)
-            print(f"💾 完整数据已保存: {filename} ({len(self.data4)} 个数据点)")
+            print(f"Complete data saved: {filename} ({len(self.data4)} data points)")
         
-        # 保存原始帧数据
+        # Save raw frame data
         if self.raw_frames:
             filename = os.path.join(self.raw_folder, f"raw_frames_{timestamp}.json")
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(self.raw_frames, f, indent=2, ensure_ascii=False)
-            print(f"💾 原始帧数据已保存: {filename} ({len(self.raw_frames)} 帧)")
+            print(f"Raw frame data saved: {filename} ({len(self.raw_frames)} frames)")
     
     def print_statistics(self):
-        """打印统计信息"""
-        print("\n📊 === 数据统计 ===")
+        """Print statistics"""
+        print("\n=== Data Statistics ===")
         
-        # 分离点云数据和跟踪数据
+        # Separate point cloud data and tracking data
         pointcloud_count = sum(1 for item in self.data4 if 'track_id' not in item)
         tracking_count = sum(1 for item in self.data4 if 'track_id' in item)
         
-        print(f"📡 总数据点: {len(self.data4)}")
-        print(f"📊 点云数据: {pointcloud_count} 个点")
-        print(f"🎯 跟踪数据: {tracking_count} 个目标")
-        print(f"📦 原始帧数: {len(self.raw_frames)} 帧")
+        print(f"Total data points: {len(self.data4)}")
+        print(f"Point cloud data: {pointcloud_count} points")
+        print(f"Tracking data: {tracking_count} targets")
+        print(f"Raw frames: {len(self.raw_frames)} frames")
         print("=" * 30)
 
 def main():
-    """主函数"""
-    print("🚀 雷达数据读取器")
+    """Main function"""
+    print("Radar Data Reader")
     print("=" * 50)
     
-    # 创建读取器
+    # Create reader
     reader = RadarReader(
         cli_com='COM4',
         data_com='COM6',
@@ -439,89 +439,89 @@ def main():
     )
     
     try:
-        # 连接串口
+        # Connect serial ports
         if not reader.connect_ports():
-            print("❌ 串口连接失败，程序退出")
+            print("Serial port connection failed, program exiting")
             return
         
-        # 加载并发送配置文件
+        # Load and send configuration file
         config_path = os.path.join(decoding_dir, '3m.cfg')
         config_lines = reader.load_config_file(config_path)
         if config_lines:
             if not reader.send_config(config_lines):
-                print("❌ 配置文件发送失败")
+                print("Configuration file sending failed")
                 return
         else:
-            print("❌ 配置文件加载失败")
+            print("Configuration file loading failed")
             return
         
-        # 等待雷达启动
-        print("⏳ 等待雷达启动...")
+        # Wait for radar to start
+        print("Waiting for radar to start...")
         time.sleep(2)
         
-        # 检查数据串口是否有数据
-        print("🔍 检查数据串口状态...")
+        # Check if data serial port has data
+        print("Checking data serial port status...")
         if reader.data_serial.in_waiting > 0:
-            print(f"📡 数据串口有 {reader.data_serial.in_waiting} 字节数据")
-            # 读取前几个字节看看
+            print(f"Data serial port has {reader.data_serial.in_waiting} bytes of data")
+            # Read first few bytes to see
             test_data = reader.data_serial.read(min(16, reader.data_serial.in_waiting))
-            print(f"🔍 前16字节: {test_data.hex()}")
+            print(f"First 16 bytes: {test_data.hex()}")
         else:
-            print("📡 数据串口暂无数据")
+            print("Data serial port has no data yet")
         
-        # 等待更长时间让雷达开始发送数据
-        print("⏳ 等待雷达开始发送数据...")
+        # Wait longer for radar to start sending data
+        print("Waiting for radar to start sending data...")
         time.sleep(5)
         
-        # 再次检查数据串口
+        # Check data serial port again
         if reader.data_serial.in_waiting > 0:
-            print(f"📡 5秒后数据串口有 {reader.data_serial.in_waiting} 字节数据")
+            print(f"After 5 seconds, data serial port has {reader.data_serial.in_waiting} bytes of data")
         else:
-            print("⚠️  5秒后数据串口仍无数据，可能雷达未正确启动")
+            print("After 5 seconds, data serial port still has no data, radar may not have started correctly")
         
-        # 开始读取数据
+        # Start reading data
         if not reader.start_reading():
-            print("❌ 启动数据读取失败")
+            print("Failed to start data reading")
             return
         
-        print("\n📊 数据读取中... (按 Ctrl+C 停止)")
+        print("\nReading data... (Press Ctrl+C to stop)")
         print("=" * 50)
         
-        # 主循环
+        # Main loop
         start_time = time.time()
         last_stats_time = start_time
         
         while True:
             try:
-                time.sleep(5)  # 每5秒检查一次
+                time.sleep(5)  # Check every 5 seconds
                 current_time = time.time()
                 
-                # 每30秒打印一次统计信息
+                # Print statistics every 30 seconds
                 if current_time - last_stats_time >= 30:
                     reader.print_statistics()
                     last_stats_time = current_time
                 
-                # 每60秒保存一次数据
+                # Save data every 60 seconds
                 if current_time - start_time >= 60:
                     reader.save_data()
                     start_time = current_time
                     
             except KeyboardInterrupt:
-                print("\n⏹️  收到停止信号...")
+                print("\nReceived stop signal...")
                 break
             except Exception as e:
-                print(f"❌ 主循环异常: {e}")
+                print(f"Main loop exception: {e}")
                 break
     
     except Exception as e:
-        print(f"❌ 程序异常: {e}")
+        print(f"Program exception: {e}")
     
     finally:
-        # 清理资源
+        # Clean up resources
         reader.stop_reading()
-        reader.save_data()  # 最终保存
+        reader.save_data()  # Final save
         reader.disconnect_ports()
-        print("✅ 程序已退出")
+        print("Program exited")
 
 if __name__ == "__main__":
     main() 

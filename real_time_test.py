@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-实时雷达动作识别测试脚本
-从雷达串口读取数据，进行6帧融合，输入到PETer模型进行实时动作识别
+Real-time Radar Action Recognition Test Script
+Read radar data from serial port, perform 6-frame fusion, and input to PETer model for real-time action recognition
 """
 
 import torch
@@ -21,7 +21,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class RealTimeRadarReader:
-    """实时雷达数据读取器"""
+    """Real-time radar data reader"""
     
     def __init__(self, cli_port='COM4', data_port='COM6', baudrate=921600):
         self.cli_port = cli_port
@@ -31,199 +31,199 @@ class RealTimeRadarReader:
         self.data_serial = None
         self.is_running = False
         self.data_queue = queue.Queue()
-        self.frame_buffer = deque(maxlen=100)  # 存储最近100帧
+        self.frame_buffer = deque(maxlen=100)  # Store recent 100 frames
         
-        # 魔法字
+        # Magic word
         self.MAGIC_WORD = b'\x02\x01\x04\x03\x06\x05\x08\x07'
         
     def connect_radar(self):
-        """连接雷达设备"""
+        """Connect radar device"""
         try:
-            print(f"\n🔌 正在连接串口...")
+            print(f"\nConnecting serial ports...")
             
-            # 连接CLI串口
-            print(f"   📡 连接CLI串口: {self.cli_port}")
+            # Connect CLI serial port
+            print(f"   Connecting CLI serial port: {self.cli_port}")
             self.cli_serial = serial.Serial(
                 self.cli_port, 
-                115200,  # CLI串口通常使用115200波特率
+                115200,  # CLI serial port usually uses 115200 baud rate
                 timeout=1
             )
-            print(f"   ✅ CLI串口连接成功")
+            print(f"   CLI serial port connected successfully")
             
-            # 连接数据端口
-            print(f"   📡 连接数据串口: {self.data_port}")
+            # Connect data port
+            print(f"   Connecting data serial port: {self.data_port}")
             self.data_serial = serial.Serial(
                 self.data_port, 
-                self.baudrate,  # 数据串口使用921600波特率
+                self.baudrate,  # Data serial port uses 921600 baud rate
                 timeout=1
             )
-            print(f"   ✅ 数据串口连接成功")
+            print(f"   Data serial port connected successfully")
             
-            print(f"✅ 所有串口连接成功")
+            print(f"All serial ports connected successfully")
             
-            # 发送配置命令
+            # Send configuration commands
             self.send_config()
             
-            # 等待雷达启动
-            print("⏳ 等待雷达启动...")
+            # Wait for radar to start
+            print("Waiting for radar to start...")
             time.sleep(2)
             
-            # 检查数据串口是否有数据
-            print("🔍 检查数据串口状态...")
+            # Check if data serial port has data
+            print("Checking data serial port status...")
             if self.data_serial.in_waiting > 0:
-                print(f"📡 数据串口有 {self.data_serial.in_waiting} 字节数据")
-                # 读取前几个字节看看
+                print(f"Data serial port has {self.data_serial.in_waiting} bytes of data")
+                # Read first few bytes to see
                 test_data = self.data_serial.read(min(16, self.data_serial.in_waiting))
-                print(f"🔍 前16字节: {test_data.hex()}")
+                print(f"First 16 bytes: {test_data.hex()}")
             else:
-                print("📡 数据串口暂无数据")
+                print("Data serial port has no data yet")
             
-            # 等待更长时间让雷达开始发送数据
-            print("⏳ 等待雷达开始发送数据...")
+            # Wait longer for radar to start sending data
+            print("Waiting for radar to start sending data...")
             time.sleep(3)
             
-            # 再次检查数据串口
+            # Check data serial port again
             if self.data_serial.in_waiting > 0:
-                print(f"📡 3秒后数据串口有 {self.data_serial.in_waiting} 字节数据")
+                print(f"After 3 seconds, data serial port has {self.data_serial.in_waiting} bytes of data")
             else:
-                print("⚠️ 3秒后数据串口仍无数据，可能雷达未正确启动")
+                print("After 3 seconds, data serial port still has no data, radar may not have started correctly")
             
             return True
             
         except Exception as e:
-            print(f"❌ 连接失败: {e}")
+            print(f"Connection failed: {e}")
             return False
     
     def load_config_file(self, config_path):
-        """加载配置文件"""
+        """Load configuration file"""
         try:
             with open(config_path, 'r') as f:
                 return [line.strip() for line in f.readlines()]
         except Exception as e:
-            print(f"❌ 加载配置文件失败: {e}")
+            print(f"Failed to load configuration file: {e}")
             return []
     
     def send_config(self):
-        """发送雷达配置 - 使用radar_reader.py的方法"""
+        """Send radar configuration - using radar_reader.py method"""
         try:
-            # 加载配置文件
+            # Load configuration file
             config_path = 'decoding/3m.cfg'
             config_lines = self.load_config_file(config_path)
             
             if not config_lines:
-                print("❌ 配置文件加载失败")
+                print("Configuration file loading failed")
                 return False
             
-            print(f"\n📋 正在发送配置文件...")
+            print(f"\nSending configuration file...")
             
-            # 移除空行和注释行
+            # Remove empty lines and comment lines
             cfg = [line for line in config_lines if line.strip() and not line.startswith('%')]
-            # 确保每行以\n结尾
+            # Ensure each line ends with \n
             cfg = [line + '\n' if not line.endswith('\n') else line for line in cfg]
             
             for line in cfg:
-                time.sleep(0.03)  # 行延迟
+                time.sleep(0.03)  # Line delay
                 
-                # 发送命令
+                # Send command
                 self.cli_serial.write(line.encode())
                 
-                # 读取确认
+                # Read acknowledgment
                 ack = self.cli_serial.readline()
                 if len(ack) == 0:
-                    print("❌ 串口超时，设备可能处于闪烁模式")
+                    print("Serial port timeout, device may be in flash mode")
                     return False
                 
-                # 安全解码
+                # Safe decode
                 try:
                     ack_text = ack.decode('utf-8').strip()
                 except UnicodeDecodeError:
                     ack_text = ack.decode('utf-8', errors='ignore').strip()
                 
-                print(f"   📤 {line.strip()} -> {ack_text}")
+                print(f"   {line.strip()} -> {ack_text}")
                 
-                # 读取第二行确认
+                # Read second line acknowledgment
                 ack = self.cli_serial.readline()
                 if ack:
                     try:
                         ack_text = ack.decode('utf-8').strip()
                     except UnicodeDecodeError:
                         ack_text = ack.decode('utf-8', errors='ignore').strip()
-                    print(f"   📤 确认: {ack_text}")
+                    print(f"   Acknowledgment: {ack_text}")
             
-            # 给缓冲区一些时间清理
+            # Give buffer some time to clear
             time.sleep(0.03)
             self.cli_serial.reset_input_buffer()
             
-            print(f"✅ 配置文件发送完成")
+            print(f"Configuration file sent successfully")
             return True
             
         except Exception as e:
-            print(f"❌ 配置发送失败: {e}")
+            print(f"Configuration sending failed: {e}")
             return False
     
     def read_frame(self):
-        """读取一帧数据 - 使用radar_reader.py的方法"""
+        """Read one frame of data - using radar_reader.py method"""
         try:
-            # 查找魔法字
+            # Find magic word
             index = 0
             magicByte = self.data_serial.read(1)
             frameData = bytearray(b'')
             
             while True:
-                # 检查是否有数据
+                # Check if there is data
                 if len(magicByte) < 1:
-                    return None  # 超时，没有数据
+                    return None  # Timeout, no data
                 
-                # 找到匹配的字节
+                # Find matching byte
                 if magicByte[0] == self.MAGIC_WORD[index]:
                     index += 1
                     frameData.append(magicByte[0])
-                    if index == 8:  # 找到完整的魔法字
+                    if index == 8:  # Found complete magic word
                         break
                     magicByte = self.data_serial.read(1)
                 else:
-                    # 重置索引
+                    # Reset index
                     if index == 0:
                         magicByte = self.data_serial.read(1)
                     index = 0
                     frameData = bytearray(b'')
             
-            # 读取版本号
+            # Read version number
             versionBytes = self.data_serial.read(4)
             frameData += bytearray(versionBytes)
             
-            # 读取长度
+            # Read length
             lengthBytes = self.data_serial.read(4)
             frameData += bytearray(lengthBytes)
             frameLength = int.from_bytes(lengthBytes, byteorder='little')
             
-            # 减去已经读取的字节（魔法字、版本、长度）
+            # Subtract already read bytes (magic word, version, length)
             frameLength -= 16
             
-            # 读取帧的其余部分
+            # Read the rest of the frame
             frameData += bytearray(self.data_serial.read(frameLength))
             
             return frameData
             
         except Exception as e:
-            print(f"❌ 读取帧失败: {e}")
+            print(f"Failed to read frame: {e}")
             return None
     
     def parse_point_cloud(self, frame_data):
-        """解析点云数据"""
+        """Parse point cloud data"""
         try:
-            # 导入解析模块
+            # Import parsing module
             import sys
             sys.path.append('decoding')
             from parseFrame import parseStandardFrame
             
-            # 解析帧
+            # Parse frame
             parsed_data = parseStandardFrame(frame_data)
             
             if 'pointCloud' in parsed_data:
                 point_cloud = parsed_data['pointCloud']
                 if len(point_cloud) > 0:
-                    # 提取xyz坐标
+                    # Extract xyz coordinates
                     points = []
                     for point in point_cloud:
                         if len(point) >= 3:
@@ -235,33 +235,33 @@ class RealTimeRadarReader:
             return np.array([])
             
         except Exception as e:
-            print(f"❌ 解析点云失败: {e}")
+            print(f"Failed to parse point cloud: {e}")
             return np.array([])
     
     def start_reading(self):
-        """开始读取数据"""
+        """Start reading data"""
         self.is_running = True
         self.read_thread = threading.Thread(target=self._read_loop)
         self.read_thread.daemon = True
         self.read_thread.start()
-        print("🚀 开始实时数据读取...")
+        print("Starting real-time data reading...")
     
     def _read_loop(self):
-        """数据读取循环"""
-        print("🔄 开始数据读取循环...")
+        """Data reading loop"""
+        print("Starting data reading loop...")
         frame_count = 0
         last_status_time = time.time()
         
         while self.is_running:
             try:
-                # 检查串口是否有数据
+                # Check if serial port has data
                 if self.data_serial.in_waiting > 0:
-                    print(f"📡 检测到数据: {self.data_serial.in_waiting} 字节")
+                    print(f"Detected data: {self.data_serial.in_waiting} bytes")
                 
                 frame_data = self.read_frame()
                 if frame_data:
                     frame_count += 1
-                    print(f"✅ 成功读取第 {frame_count} 帧数据")
+                    print(f"Successfully read frame {frame_count}")
                     
                     points = self.parse_point_cloud(frame_data)
                     if len(points) > 0:
@@ -274,52 +274,52 @@ class RealTimeRadarReader:
                             'timestamp': timestamp,
                             'points': points
                         })
-                        print(f"📊 解析到 {len(points)} 个点云点")
+                        print(f"Parsed {len(points)} point cloud points")
                     else:
-                        print("⚠️ 帧数据中没有点云信息")
+                        print("No point cloud information in frame data")
                 else:
-                    # 每5秒显示一次状态
+                    # Show status every 5 seconds
                     current_time = time.time()
                     if current_time - last_status_time > 5:
-                        print(f"⏳ 等待数据... (已读取 {frame_count} 帧)")
+                        print(f"Waiting for data... (Read {frame_count} frames)")
                         last_status_time = current_time
                 
-                time.sleep(0.01)  # 10ms间隔
+                time.sleep(0.01)  # 10ms interval
                 
             except Exception as e:
-                print(f"❌ 读取循环错误: {e}")
+                print(f"Reading loop error: {e}")
                 time.sleep(0.1)
     
     def stop_reading(self):
-        """停止读取数据"""
+        """Stop reading data"""
         self.is_running = False
         if self.cli_serial:
             self.cli_serial.close()
         if self.data_serial:
             self.data_serial.close()
-        print("⏹️ 停止数据读取")
+        print("Stopped data reading")
 
 class RealTimeActionRecognizer:
-    """实时动作识别器"""
+    """Real-time action recognizer"""
     
     def __init__(self, model_path='best_peter_model.pth', num_frames=6, num_points=100):
-        self.num_frames = num_frames  # 每次融合的帧数
+        self.num_frames = num_frames  # Number of frames to fuse each time
         self.num_points = num_points
-        self.frame_buffer = deque(maxlen=num_frames)  # 只需要存储6帧
+        self.frame_buffer = deque(maxlen=num_frames)  # Only need to store 6 frames
         self.action_labels = ['sit', 'squat', 'stand']
         
-        # 稳定性机制
-        self.prediction_history = deque(maxlen=10)  # 保存最近10次预测
-        self.stability_threshold = 0.6  # 置信度阈值
-        self.min_consistent_predictions = 3  # 最少连续预测次数
-        self.last_stable_prediction = None  # 上次稳定的预测结果
+        # Stability mechanism
+        self.prediction_history = deque(maxlen=10)  # Save recent 10 predictions
+        self.stability_threshold = 0.6  # Confidence threshold
+        self.min_consistent_predictions = 3  # Minimum consecutive prediction count
+        self.last_stable_prediction = None  # Last stable prediction result
         
-        # 类别平衡机制
-        self.class_weights = [2.0, 2.0, 0.5]  # sit, squat, stand的权重
-        self.prediction_counts = {'sit': 0, 'squat': 0, 'stand': 0}  # 预测计数
-        self.max_consecutive_same = 5  # 最大连续相同预测次数
+        # Class balance mechanism
+        self.class_weights = [2.0, 2.0, 0.5]  # Weights for sit, squat, stand
+        self.prediction_counts = {'sit': 0, 'squat': 0, 'stand': 0}  # Prediction counts
+        self.max_consecutive_same = 5  # Maximum consecutive same prediction count
         
-        # 加载模型
+        # Load model
         self.model = PETerNetwork(num_classes=3, num_points=num_points, num_frames=25, k=10)
         if torch.cuda.is_available():
             self.model.load_state_dict(torch.load(model_path, map_location='cuda'))
@@ -328,23 +328,23 @@ class RealTimeActionRecognizer:
             self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
         
         self.model.eval()
-        print(f"✅ 模型加载完成: {model_path}")
+        print(f"Model loaded successfully: {model_path}")
     
     def preprocess_points(self, points):
-        """预处理点云数据"""
+        """Preprocess point cloud data"""
         if len(points) == 0:
             return np.zeros((self.num_points, 3))
         
-        # 标准化
+        # Standardize
         centroid = np.mean(points, axis=0)
         points = points - centroid
         
-        # 缩放到单位球
+        # Scale to unit sphere
         max_dist = np.max(np.linalg.norm(points, axis=1))
         if max_dist > 0:
             points = points / max_dist
         
-        # 采样固定数量点
+        # Sample fixed number of points
         if len(points) >= self.num_points:
             indices = np.random.choice(len(points), self.num_points, replace=False)
             return points[indices]
@@ -354,11 +354,11 @@ class RealTimeActionRecognizer:
     
     def fuse_frames(self, frame_group):
         """
-        融合一组帧的点云数据
+        Fuse point cloud data from a group of frames
         Args:
-            frame_group: 一组帧的点云数据列表
+            frame_group: List of point cloud data from a group of frames
         Returns:
-            fused_points: 融合后的点云数据
+            fused_points: Fused point cloud data
         """
         all_points = []
         
@@ -370,35 +370,35 @@ class RealTimeActionRecognizer:
         if not all_points:
             return np.empty((0, 3))
         
-        # 将所有帧的点云合并
+        # Merge point clouds from all frames
         fused_points = np.vstack(all_points)
         return fused_points
     
     def create_sequence(self):
-        """创建时序序列 - 直接融合6帧后重复到25帧"""
+        """Create time sequence - directly fuse 6 frames then repeat to 25 frames"""
         if len(self.frame_buffer) < self.num_frames:
             return None
         
-        # 获取最近6帧
+        # Get recent 6 frames
         recent_frames = list(self.frame_buffer)[-self.num_frames:]
         
-        # 融合6帧点云数据
+        # Fuse 6 frames of point cloud data
         fused_points = self.fuse_frames(recent_frames)
         
-        # 预处理融合后的点云
+        # Preprocess fused point cloud
         processed_points = self.preprocess_points(fused_points)
         
-        # 添加强度信息
+        # Add intensity information
         intensity = np.ones((len(processed_points), 1))
         points_with_intensity = np.hstack([processed_points, intensity])
         
-        # 创建25帧序列（重复融合后的点云）
-        sequence = np.tile(points_with_intensity, (25, 1, 1))  # 重复25次
+        # Create 25-frame sequence (repeat fused point cloud)
+        sequence = np.tile(points_with_intensity, (25, 1, 1))  # Repeat 25 times
         
-        return torch.FloatTensor(sequence).unsqueeze(0)  # 添加batch维度
+        return torch.FloatTensor(sequence).unsqueeze(0)  # Add batch dimension
     
     def predict_action(self, sequence):
-        """预测动作（带类别平衡）"""
+        """Predict action (with class balancing)"""
         try:
             with torch.no_grad():
                 if torch.cuda.is_available():
@@ -406,7 +406,7 @@ class RealTimeActionRecognizer:
                 
                 output = self.model(sequence)
                 
-                # 应用类别权重
+                # Apply class weights
                 weighted_output = output.clone()
                 for i, weight in enumerate(self.class_weights):
                     weighted_output[0, i] *= weight
@@ -415,7 +415,7 @@ class RealTimeActionRecognizer:
                 predicted_class = torch.argmax(weighted_output, dim=1).item()
                 confidence = probabilities[0][predicted_class].item()
                 
-                # 更新预测计数
+                # Update prediction counts
                 predicted_action = self.action_labels[predicted_class]
                 self.prediction_counts[predicted_action] += 1
                 
@@ -423,52 +423,52 @@ class RealTimeActionRecognizer:
                     'action': predicted_action,
                     'confidence': confidence,
                     'probabilities': probabilities[0].cpu().numpy(),
-                    'raw_probabilities': torch.softmax(output, dim=1)[0].cpu().numpy()  # 原始概率
+                    'raw_probabilities': torch.softmax(output, dim=1)[0].cpu().numpy()  # Raw probabilities
                 }
                 
         except Exception as e:
-            print(f"❌ 预测失败: {e}")
+            print(f"Prediction failed: {e}")
             return None
     
     def add_frame(self, points):
-        """添加新帧"""
+        """Add new frame"""
         self.frame_buffer.append({
             'timestamp': time.time(),
             'points': points
         })
     
     def get_stable_prediction(self):
-        """获取稳定的预测结果（带类别平衡）"""
+        """Get stable prediction result (with class balancing)"""
         sequence = self.create_sequence()
         if sequence is not None:
             current_prediction = self.predict_action(sequence)
             if current_prediction is None:
                 return self.last_stable_prediction
             
-            # 添加到预测历史
+            # Add to prediction history
             self.prediction_history.append(current_prediction)
             
-            # 检查连续预测次数，防止过度偏向某个类别
+            # Check consecutive prediction count to prevent over-biasing towards a certain class
             if len(self.prediction_history) >= self.max_consecutive_same:
                 recent_actions = [pred['action'] for pred in list(self.prediction_history)[-self.max_consecutive_same:]]
-                if len(set(recent_actions)) == 1:  # 连续预测相同动作
-                    # 降低该动作的权重
+                if len(set(recent_actions)) == 1:  # Consecutive same action predictions
+                    # Reduce weight for this action
                     action_idx = self.action_labels.index(recent_actions[0])
                     self.class_weights[action_idx] = max(0.1, self.class_weights[action_idx] * 0.8)
-                    print(f"⚠️ 连续预测{recent_actions[0]}，降低权重至{self.class_weights[action_idx]:.2f}")
+                    print(f"Consecutive {recent_actions[0]} predictions, reducing weight to {self.class_weights[action_idx]:.2f}")
             
-            # 如果置信度足够高，直接返回
+            # If confidence is high enough, return directly
             if current_prediction['confidence'] > 0.8:
                 self.last_stable_prediction = current_prediction
                 return current_prediction
             
-            # 检查历史预测的一致性
+            # Check consistency of historical predictions
             if len(self.prediction_history) >= self.min_consistent_predictions:
                 recent_predictions = list(self.prediction_history)[-self.min_consistent_predictions:]
                 
-                # 检查是否连续预测相同动作
+                # Check if consecutive same action predictions
                 actions = [pred['action'] for pred in recent_predictions]
-                if len(set(actions)) == 1:  # 所有预测都是同一动作
+                if len(set(actions)) == 1:  # All predictions are the same action
                     avg_confidence = np.mean([pred['confidence'] for pred in recent_predictions])
                     if avg_confidence > self.stability_threshold:
                         stable_prediction = {
@@ -480,165 +480,165 @@ class RealTimeActionRecognizer:
                         self.last_stable_prediction = stable_prediction
                         return stable_prediction
             
-            # 如果当前预测置信度较高，更新稳定预测
+            # If current prediction confidence is high, update stable prediction
             if current_prediction['confidence'] > self.stability_threshold:
                 self.last_stable_prediction = current_prediction
             
-            # 返回上次的稳定预测或当前预测
+            # Return last stable prediction or current prediction
             return self.last_stable_prediction if self.last_stable_prediction else current_prediction
         
         return self.last_stable_prediction
     
     def get_prediction(self):
-        """获取预测结果（保持向后兼容）"""
+        """Get prediction result (maintain backward compatibility)"""
         return self.get_stable_prediction()
 
 class RealTimeVisualizer:
-    """实时可视化器"""
+    """Real-time visualizer"""
     
     def __init__(self):
         self.fig = plt.figure(figsize=(15, 6))
-        self.fig.suptitle('实时雷达动作识别', fontsize=16)
+        self.fig.suptitle('Real-time Radar Action Recognition', fontsize=16)
         
-        # 点云显示（3D）
+        # Point cloud display (3D)
         self.ax1 = self.fig.add_subplot(121, projection='3d')
         self.ax1.set_xlabel('X')
         self.ax1.set_ylabel('Y')
         self.ax1.set_zlabel('Z')
-        self.ax1.set_title('实时点云')
+        self.ax1.set_title('Real-time Point Cloud')
         
-        # 动作概率显示
+        # Action probability display
         self.ax2 = self.fig.add_subplot(122)
-        self.ax2.set_title('动作识别概率')
+        self.ax2.set_title('Action Recognition Probability')
         self.ax2.set_ylim(0, 1)
         
-        # 动作概率显示
-        self.ax2.set_title('动作识别概率')
+        # Action probability display
+        self.ax2.set_title('Action Recognition Probability')
         self.ax2.set_ylim(0, 1)
         
         self.action_labels = ['sit', 'squat', 'stand']
         self.prob_bars = None
         self.point_cloud_plot = None
         
-        plt.ion()  # 开启交互模式
+        plt.ion()  # Enable interactive mode
     
     def update_visualization(self, points, prediction):
-        """更新可视化"""
-        # 清除旧图
+        """Update visualization"""
+        # Clear old plots
         self.ax1.clear()
         self.ax2.clear()
         
-        # 绘制点云
+        # Draw point cloud
         if len(points) > 0:
             self.ax1.scatter(points[:, 0], points[:, 1], points[:, 2], c='b', alpha=0.6)
         
         self.ax1.set_xlabel('X')
         self.ax1.set_ylabel('Y')
         self.ax1.set_zlabel('Z')
-        self.ax1.set_title('实时点云')
+        self.ax1.set_title('Real-time Point Cloud')
         self.ax1.set_xlim(-2, 2)
         self.ax1.set_ylim(-2, 2)
         self.ax1.set_zlim(-2, 2)
-        self.ax1.view_init(elev=20, azim=45)  # 设置3D视角
+        self.ax1.view_init(elev=20, azim=45)  # Set 3D view angle
         
-        # 绘制动作概率
+        # Draw action probabilities
         if prediction:
             probabilities = prediction['probabilities']
             bars = self.ax2.bar(self.action_labels, probabilities, color=['red', 'green', 'blue'])
             
-            # 添加概率值标签
+            # Add probability value labels
             for bar, prob in zip(bars, probabilities):
                 self.ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
                              f'{prob:.3f}', ha='center', va='bottom')
             
-            # 高亮预测的动作
+            # Highlight predicted action
             predicted_action = prediction['action']
             predicted_idx = self.action_labels.index(predicted_action)
             bars[predicted_idx].set_color('orange')
             
-            self.ax2.set_title(f'动作识别: {predicted_action} (置信度: {prediction["confidence"]:.3f})')
+            self.ax2.set_title(f'Action Recognition: {predicted_action} (Confidence: {prediction["confidence"]:.3f})')
         
         self.ax2.set_ylim(0, 1)
-        self.ax2.set_ylabel('概率')
+        self.ax2.set_ylabel('Probability')
         
         plt.tight_layout()
         plt.pause(0.01)
 
 def main():
-    """主函数"""
-    print("🎯 实时雷达动作识别测试")
+    """Main function"""
+    print("Real-time Radar Action Recognition Test")
     print("=" * 60)
     
-    # 检查模型文件
+    # Check model file
     if not os.path.exists('best_peter_model.pth'):
-        print("❌ 模型文件不存在，请先运行训练脚本")
+        print("Model file does not exist, please run training script first")
         return
     
-    # 创建组件
+    # Create components
     radar_reader = RealTimeRadarReader()
     action_recognizer = RealTimeActionRecognizer()
     visualizer = RealTimeVisualizer()
     
-    # 连接雷达
+    # Connect radar
     if not radar_reader.connect_radar():
-        print("❌ 雷达连接失败")
+        print("Radar connection failed")
         return
     
     try:
-        # 开始读取数据
+        # Start reading data
         radar_reader.start_reading()
         
-        print("📊 开始实时识别...")
-        print("📋 需要收集6帧数据才能开始预测（6帧融合）")
-        print("按 Ctrl+C 停止")
+        print("Starting real-time recognition...")
+        print("Need to collect 6 frames of data to start prediction (6-frame fusion)")
+        print("Press Ctrl+C to stop")
         
         last_prediction_time = 0
-        prediction_interval = 0.5  # 每0.5秒预测一次
+        prediction_interval = 0.5  # Predict every 0.5 seconds
         
         while True:
             try:
-                # 获取最新数据
+                # Get latest data
                 if not radar_reader.data_queue.empty():
                     data = radar_reader.data_queue.get()
                     points = data['points']
                     
-                    # 添加到识别器
+                    # Add to recognizer
                     action_recognizer.add_frame(points)
                     
-                    # 显示当前帧数状态
+                    # Show current frame count status
                     current_frames = len(action_recognizer.frame_buffer)
-                    if current_frames <= 6:  # 显示前6帧的状态
-                        print(f"📊 已收集 {current_frames}/6 帧数据")
+                    if current_frames <= 6:  # Show status for first 6 frames
+                        print(f"Collected {current_frames}/6 frames of data")
                     
-                    # 定期进行预测
+                    # Perform prediction periodically
                     current_time = time.time()
                     if current_time - last_prediction_time >= prediction_interval:
                         prediction = action_recognizer.get_prediction()
                         if prediction:
-                            print(f"🎯 识别结果: {prediction['action']} (置信度: {prediction['confidence']:.3f})")
+                            print(f"Recognition result: {prediction['action']} (Confidence: {prediction['confidence']:.3f})")
                             
-                            # 更新可视化
+                            # Update visualization
                             visualizer.update_visualization(points, prediction)
                         else:
-                            print(f"⏳ 等待更多数据... (当前: {current_frames}/6 帧)")
+                            print(f"Waiting for more data... (Current: {current_frames}/6 frames)")
                         
                         last_prediction_time = current_time
                 
                 time.sleep(0.01)
                 
             except KeyboardInterrupt:
-                print("\n⏹️ 用户停止")
+                print("\nUser stopped")
                 break
             except Exception as e:
-                print(f"❌ 运行错误: {e}")
+                print(f"Runtime error: {e}")
                 time.sleep(0.1)
     
     finally:
-        # 清理资源
+        # Clean up resources
         radar_reader.stop_reading()
         plt.ioff()
         plt.close()
-        print("✅ 测试完成")
+        print("Test completed")
 
 if __name__ == "__main__":
     import os

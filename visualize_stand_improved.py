@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-可视化radar_data目录下的点云数据（包括improved_fused目录）
+Visualize point cloud data in radar_data directory (including improved_fused directory)
 """
 
 import json
@@ -11,55 +11,55 @@ from mpl_toolkits.mplot3d import Axes3D
 import glob
 
 def load_pointcloud_data(file_path):
-    """加载点云数据文件"""
+    """Load point cloud data file"""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data
     except Exception as e:
-        print(f"❌ 加载文件失败 {file_path}: {e}")
+        print(f"Failed to load file {file_path}: {e}")
         return None
 
 def visualize_pointcloud_samples(data_dir, category_name, max_samples=3):
-    """可视化点云样本"""
-    print(f"📁 可视化目录: {data_dir}")
+    """Visualize point cloud samples"""
+    print(f"Visualizing directory: {data_dir}")
     
-    # 查找所有JSON文件
+    # Find all JSON files
     json_files = glob.glob(os.path.join(data_dir, "*.json"))
     
     if not json_files:
-        print(f"⚠️  未找到JSON文件: {data_dir}")
+        print(f"No JSON files found: {data_dir}")
         return
     
-    print(f"📊 找到 {len(json_files)} 个文件")
+    print(f"Found {len(json_files)} files")
     
-    # 限制显示的样本数量
+    # Limit number of samples to display
     json_files = json_files[:max_samples]
     
     for i, json_file in enumerate(json_files):
-        print(f"\n📄 处理文件 {i+1}/{len(json_files)}: {os.path.basename(json_file)}")
+        print(f"\nProcessing file {i+1}/{len(json_files)}: {os.path.basename(json_file)}")
         
-        # 加载数据
+        # Load data
         data = load_pointcloud_data(json_file)
         if data is None:
             continue
         
-        # 检查数据格式
+        # Check data format
         if isinstance(data, list):
-            print(f"  数据格式: 列表，包含 {len(data)} 个样本")
+            print(f"  Data format: List, contains {len(data)} samples")
             
-            # 可视化前几个样本
-            for j, sample in enumerate(data[:3]):  # 只显示前3个样本
+            # Visualize first few samples
+            for j, sample in enumerate(data[:3]):  # Only show first 3 samples
                 if isinstance(sample, dict) and 'target_points' in sample:
                     target_points = np.array(sample['target_points'])
                     noise_points = np.array(sample.get('noise_points', []))
                     
-                    print(f"    样本 {j+1}: 目标点 {len(target_points)}, 噪声点 {len(noise_points)}")
+                    print(f"    Sample {j+1}: Target points {len(target_points)}, Noise points {len(noise_points)}")
                     
-                    # 创建可视化
+                    # Create visualization
                     fig = plt.figure(figsize=(15, 5))
                     
-                    # 目标点云
+                    # Target point cloud
                     ax1 = fig.add_subplot(131, projection='3d')
                     if len(target_points) > 0:
                         ax1.scatter(target_points[:, 0], target_points[:, 1], target_points[:, 2], 
@@ -70,7 +70,7 @@ def visualize_pointcloud_samples(data_dir, category_name, max_samples=3):
                     ax1.set_title(f'Target Points ({len(target_points)})')
                     ax1.legend()
                     
-                    # 噪声点云
+                    # Noise point cloud
                     ax2 = fig.add_subplot(132, projection='3d')
                     if len(noise_points) > 0:
                         ax2.scatter(noise_points[:, 0], noise_points[:, 1], noise_points[:, 2], 
@@ -81,7 +81,7 @@ def visualize_pointcloud_samples(data_dir, category_name, max_samples=3):
                     ax2.set_title(f'Noise Points ({len(noise_points)})')
                     ax2.legend()
                     
-                    # 合并点云
+                    # Combined point cloud
                     ax3 = fig.add_subplot(133, projection='3d')
                     if len(target_points) > 0:
                         ax3.scatter(target_points[:, 0], target_points[:, 1], target_points[:, 2], 
@@ -98,33 +98,33 @@ def visualize_pointcloud_samples(data_dir, category_name, max_samples=3):
                     plt.suptitle(f'{category_name.capitalize()} Improved Fused - {os.path.basename(json_file)} - Sample {j+1}')
                     plt.tight_layout()
                     
-                    # 保存图片
+                    # Save image
                     save_path = f"{category_name}_improved_visualization_{os.path.basename(json_file).replace('.json', '')}_sample{j+1}.png"
                     plt.savefig(save_path, dpi=300, bbox_inches='tight')
-                    print(f"    📊 可视化已保存: {save_path}")
+                    print(f"    Visualization saved: {save_path}")
                     
                     plt.show()
                     
-                    # 显示特征信息
+                    # Display feature information
                     if 'target_features' in sample:
                         features = sample['target_features']
-                        print(f"    特征: 点数={features.get('num_points', 0)}, "
-                              f"密度={features.get('point_density', 0):.2f}, "
-                              f"体积={features.get('spatial_volume', 0):.2f}")
+                        print(f"    Features: Points={features.get('num_points', 0)}, "
+                              f"Density={features.get('point_density', 0):.2f}, "
+                              f"Volume={features.get('spatial_volume', 0):.2f}")
                 else:
-                    print(f"    样本 {j+1}: 数据格式不正确")
+                    print(f"    Sample {j+1}: Incorrect data format")
         else:
-            print(f"  数据格式: 非列表格式")
-            print(f"  数据类型: {type(data)}")
+            print(f"  Data format: Non-list format")
+            print(f"  Data type: {type(data)}")
             if isinstance(data, dict):
-                print(f"  字典键: {list(data.keys())}")
+                print(f"  Dictionary keys: {list(data.keys())}")
 
 def main():
-    """主函数"""
-    print("🎨 可视化Improved Fused点云数据")
+    """Main function"""
+    print("Visualizing Improved Fused Point Cloud Data")
     print("=" * 60)
     
-    # 定义improved_fused数据目录
+    # Define improved_fused data directories
     improved_data_dirs = {
         'stand': 'radar_data/stand_improved_fused/improved_fused_pointcloud',
         'squat': 'radar_data/squat_improved_fused/improved_fused_pointcloud', 
@@ -135,11 +135,11 @@ def main():
         print(f"\n{'='*20} {category.upper()} IMPROVED FUSED {'='*20}")
         
         if not os.path.exists(data_dir):
-            print(f"❌ 目录不存在: {data_dir}")
+            print(f"Directory does not exist: {data_dir}")
             continue
         
-        # 可视化点云样本
-        visualize_pointcloud_samples(data_dir, category, max_samples=2)  # 每个类别显示2个文件
+        # Visualize point cloud samples
+        visualize_pointcloud_samples(data_dir, category, max_samples=2)  # Show 2 files per category
 
 if __name__ == "__main__":
     main() 
